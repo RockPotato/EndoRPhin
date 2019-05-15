@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="attitude">
+
+
+	<!-- 근태항목 전체 가져오기 -->
+	<select id="getAllAttitude" resultType="attitudeVo">
+		select
+            attitudecode, attitudename, paidstatus, relate, basedays
+        from attitude
+	</select>
+	
+	
+	
+	<!-- 근태항목 데이터 추가하기 -->
+	<insert id="insertAttitude" parameterType="attitudeVo">
+		insert into attitude
+			(attitudecode, 
+             attitudename, 
+             paidstatus, 
+             relate, 
+             basedays)
+    	values
+    		(#{attitudeCode},
+    		 #{attitudeName}, 
+    		 #{paidStatus},
+    		 #{relate},
+    		 #{baseDays})
+	</insert>
+	
+	
+	
+	
+		<!-- 근태항목 삭제 -->
+		<delete id="deleteAttitude" parameterType="map">
+			delete from attitude
+			where attitudecode = #{attitudeCode}
+		</delete>
+	
+	
+	
+			<!-- 근태항목 업데이트 -->
+			<update id="updateAttitude" parameterType="attitudeVo">
+			update attitude set
+			
+			attitudename=nvl(#{attitudeName,jdbcType=VARCHAR},attitudeName),
+			paidstatus=nvl(#{paidStatus,jdbcType=VARCHAR},paidStatus),
+			relate=nvl(#{relate,jdbcType=VARCHAR},relate),
+			basedays=nvl(#{baseDays,jdbcType=VARCHAR},baseDays)
+		
+			where attitudecode=#{attitudeCode}
+			</update>
+			
+			
+			
+			
+			<!-- 근태항목 선택하여 가져오기 -->
+	<select id="SearchAttitude" resultType="attitudeVo"
+		parameterType="attitudeVo">
+		select
+            attitudecode, attitudename, paidstatus, relate, basedays
+        from attitude
+        <where>
+        	<if test="attitudeCode!=null">
+    	    	 or attitudecode like '%'||#{attitudeCode}||'%'
+        	</if>
+        	<if test="attitudeName!=null">
+	        	 or attitudename like '%'||#{attitudeName}||'%'
+        	</if>
+		</where>
+	</select>
+	
+	
+			<!-- 근태항목 선택하여 가져오기 -->
+	<select id="SelectAttitude" resultType="attitudeVo"
+		parameterType="map">
+		select
+            attitudecode, attitudename, paidstatus, relate, basedays
+        from attitude
+       where attitudecode=#{attitudeCode}
+	</select>
+	
+	
+	
+</mapper>
+
+
+

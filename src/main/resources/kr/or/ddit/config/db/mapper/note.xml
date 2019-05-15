@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="note">
+
+
+	<insert id="insertNote" parameterType="NoteVo">
+		insert into Note
+		(noteno, sendid, receiveid, title, content, senddate)
+		values
+		(
+		note_seq.nextval,
+		nvl(#{sendid, jdbcType=VARCHAR},null),
+		nvl(#{receiveid, jdbcType=VARCHAR},null),
+		nvl(#{title, jdbcType=VARCHAR},null),
+		nvl(#{content, jdbcType=VARCHAR},null),
+		sysdate
+		)
+
+	</insert>
+	
+
+	<select id="receiveNewNote" resultType="NoteVo" parameterType="NoteVo">
+	 select
+	a.noteno, a.sendid, a.receiveid, a.title, a.content, a.senddate, a.receivedate,
+    b.userid, b.usernm
+	from note a, employee b  
+	where a.sendid = b.userid
+	<if test="receiveid != null">
+    and a.receiveid = #{receiveid}
+    </if>
+	<if test="sendid != null">
+    and a.sendid = #{sendid}
+    </if>
+	</select>
+	
+	
+	
+	
+	<update id="receivedateUpdate" parameterType="map">
+		    update note set
+			receivedate = sysdate
+			where noteno =#{noteno}
+	</update>
+	
+	<delete id="deleteNote" parameterType="map">
+	delete from note
+	where noteno =#{noteno}
+	</delete>
+	
+
+
+
+</mapper>
+
+
+

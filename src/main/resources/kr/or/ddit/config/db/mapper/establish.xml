@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="establish">
+
+	<!-- 계정과목 입력 -->
+	<insert id="insertEstablish" parameterType="establishVo">
+		INSERT INTO ESTABLISH
+			(ESTABLISHCODE, ESTABLISHNAMEKOR, ESTABLISHNAMEENG, STATUS, SLIPSTATUS, CLIENTSTATUS, USESTATUS)
+		VALUES
+			(
+			#{establishCode},
+			#{establishNameKor},
+			#{establishNameEng},
+			#{status},
+			#{slipstatus},
+			#{clientStatus},
+			#{useStatus}
+			)
+			
+	</insert>
+	
+	<update id="updateEstablish" parameterType="establishVo">
+	UPDATE ESTABLISH
+		SET ESTABLISHNAMEKOR = #{establishNameKor}, 
+		    ESTABLISHNAMEENG = #{establishNameEng}, 
+		    STATUS = #{status}, 
+		    SLIPSTATUS = #{slipstatus}, 
+		    CLIENTSTATUS = #{clientStatus}, 
+		    USESTATUS = #{useStatus}
+	WHERE ESTABLISHCODE = #{establishCode}
+	</update>
+
+
+	<!-- 계정과목 전체 불러오기 -->
+	<select id="getAllEstablish" resultType="establishVo">
+		select
+		establishcode, establishnamekor, establishnameeng,
+		 status, slipstatus, clientstatus, usestatus
+		from establish
+		ORDER BY establishcode ASC
+	</select>
+
+
+	<!-- 계정과목 선택하여 가져오기 -->
+	<select id="selectEstablish" resultType="establishVo"
+		parameterType="map">
+		select
+		establishcode, establishnamekor, establishnameeng,
+		 status, slipstatus, clientstatus, usestatus
+		from
+		establish where establishcode = #{establishCode}
+	</select>
+
+
+	<!-- 계정과목 삭제 -->
+	<delete id="deleteEstablish" parameterType="map">
+		delete from establish
+		where establishcode = #{establishCode}
+	</delete>
+	
+	
+	<!-- 계정과목명 검색 -->
+	<select id="selectEstablishByNm" resultType="establishVo"
+	parameterType="map">
+		select
+			establishcode, establishnamekor, establishnameeng,
+		 status, slipstatus, clientstatus, usestatus
+		from	establish
+		where	establishNameKor like '%'||#{establishNameKor}||'%'
+	</select>
+	
+	<!-- 페이징처리를 위한 조회 -->
+	<select id="selectEstablishPagingList" resultType="establishVo" parameterType="pageVo">
+		select *
+		  from
+			  (select a.*, rownum rn
+				 from
+					 (select establish.*
+						from establish
+					  order by ESTABLISHCODE) a ) a
+		 where rn between (#{page}-1)*#{pageSize}+1 and #{page}*#{pageSize}
+	</select>
+	
+	
+	
+	<!-- 전체 계정과목 수 조회 -->
+	<select id="getEstablishCnt" resultType="Integer">
+		select count(*)
+ 		  from ESTABLISH
+	</select>
+
+</mapper>
+
+
+

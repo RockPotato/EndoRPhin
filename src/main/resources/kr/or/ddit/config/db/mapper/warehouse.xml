@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="warehouse">
+
+	<!-- 창고 입력 -->
+	<insert id="insertWarehouse" parameterType="warehouseVo">
+	<selectKey keyProperty="wareHouseCode" resultType="String" order="BEFORE">
+		  	select 
+		  		WAREHOUSE_SEQ.NEXTVAL
+		  	from 
+		  		dual
+	    </selectKey>
+		insert into warehouse
+		(warehousecode,
+		warehousename,
+		warehouselocal)
+		values
+		(#{wareHouseCode},#{wareHouseName}
+		,nvl(#{wareHouselocal, jdbcType=VARCHAR},null))
+
+	</insert>
+
+
+	<!-- 창고 전체 불러오기 -->
+	<select id="getAllWarehouse" resultType="warehouseVo">
+		select
+		warehousecode,
+		warehousename,
+		warehouselocal
+		from warehouse
+		order by warehousecode
+	</select>
+
+
+	<!-- 창고 선택하여 가져오기 -->
+	<select id="selectWarehouse" resultType="warehouseVo"
+		parameterType="String">
+		select
+		warehousecode,
+		warehousename,
+		warehouselocal
+		from
+		warehouse where warehousecode = #{wareHouseCode}
+		order by warehousecode
+	</select>
+
+
+	<!-- 창고 삭제 -->
+	<delete id="deleteWarehouse" parameterType="String">
+		delete from warehouse
+		where warehousecode = #{wareHouseCode}
+	</delete>
+
+
+
+	<!-- 창고 입출력 목록 가져오기 -->
+	<select id="WarehouseList" resultType="warehouseVO"
+		parameterType="string">
+		select
+		a.warehousename,
+		a.warehouselocal,
+		b.receivedate,
+		b.sortation,
+		b.quantity,
+		b.material
+		from warehouse a, receive b
+		where
+		b.warehousecode = #{a.wareHouseCode}
+		order by a.warehousename desc
+	</select>
+
+	<update id="updateWareHouse" parameterType="warehouseVo">
+		update warehouse
+		set	warehousename = nvl(#{wareHouseName, jdbcType=VARCHAR},warehousename)
+		,	warehouselocal =nvl(#{wareHouselocal, jdbcType=VARCHAR},warehouselocal)
+		where	warehousecode= #{wareHouseCode}
+	</update>
+
+
+</mapper>
+
+
+

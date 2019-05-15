@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="order_detail">
+
+	<!-- 발주서 상세 입력 -->
+	<insert id="insertOrder_detail" parameterType="order_detailVo">
+		insert into order_detail
+		(orderdetailcode, ordercode, quantity, productcode)
+		values
+		(#{orderDetailCode},#{orderCode},#{quantity},#{productCode})
+	</insert>
+
+
+	<!-- 발주서 상세 전체 불러오기 -->
+	<select id="getAllOrder_detail" resultType="order_detailVo">
+		select
+		orderdetailcode, ordercode, quantity, productcode
+		from order_detail
+	</select>
+
+
+	<!-- 발주서 상세 선택하여 가져오기 -->
+	<select id="selectOrder_detail" resultType="order_detailVo"
+		parameterType="map">
+		select
+		orderdetailcode, ordercode, quantity, productcode
+		from
+		order_detail where orderdetailcode = #{orderdetailCode}
+	</select>
+
+
+	<!-- 발주서 상세 전체 불러오기 -->
+	<select id="getOrder_detailByOrdercd" resultType="order_detailVo" parameterType="map">
+		select
+		orderdetailcode,ordercode,quantity,productname,standard,baseprice, od.productcode
+		from order_detail od, product p
+		where	p.productcode = od.productcode
+		and		ordercode = #{orderCode}
+	</select>
+	
+	<!-- 발주서 상세 삭제 -->
+	<delete id="deleteOrder_detail" parameterType="map">
+		delete from order_detail
+		where orderdetailcode = #{orderdetailcode}
+	</delete>
+	<!-- 발주서 상세 삭제 -->
+	<delete id="deleteOrder_detailByOdcd" parameterType="map">
+		delete from order_detail
+		where ordercode = #{orderCode}
+	</delete>
+
+
+</mapper>
+
+
+

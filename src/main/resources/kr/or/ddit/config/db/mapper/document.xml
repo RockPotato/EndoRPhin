@@ -1,0 +1,399 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="document">
+	
+	<!-- 기안 입력 -->
+	<insert id="insertDocument" parameterType="documentVo">
+		<selectKey keyProperty="documentNumber" resultType="String" order="AFTER">
+		  	select 
+		  		document_seq.currval
+		  	from 
+		  		dual
+	    </selectKey>
+		insert into document
+		(documentNumber, title, preservation, presentDate, contents, tempsortation,
+		 completesortation, presentuser, presentdepartment,documentType)
+		values
+		(document_seq.nextval
+		,#{title}
+		,#{preservation}
+		, #{presentDate}
+		,nvl(#{contents, jdbcType=VARCHAR},null)
+		,nvl(#{tempSortation, jdbcType=VARCHAR},null)
+		,nvl(#{completeSortation, jdbcType=VARCHAR},null)
+		,#{presentUser}
+		,#{presentDepartment}
+		,nvl(#{documentType, jdbcType=VARCHAR},null))
+	</insert>
+
+	<!-- 기안문서 기안완료출력-->
+	<select id="getAllDocument" resultType="documentVo">
+    select  a.documentNumber,
+		        a.title,
+		        a.preservation,
+		        a.presentDate,
+		        a.contents,
+		        a.tempSortation,
+		        a.completeSortation,
+		        b.userNm presentUser,
+		        c.deptname presentDepartment,
+		        a.documentType
+   		   from  document a ,employee b, dept c
+    	  where  a.presentUser = b.userid
+     		and  a.presentDepartment = c.deptCode
+            and  a.completeSortation = '1'
+            and  a.tempSortation = '0'
+	</select>
+
+	<!--기안문서 임시보관함 출력  -->
+	<select id="getAllTemporarily" resultType="documentVo">
+	    select  a.documentNumber,
+		        a.title,
+		        a.preservation,
+		        a.presentDate,
+		        a.contents,
+		        a.tempSortation,
+		        a.completeSortation,
+		        b.userNm presentUser,
+		        c.deptname presentDepartment,
+		        a.documentType
+   		   from  document a ,employee b, dept c
+    	  where  a.presentUser = b.userid
+     		and  a.presentDepartment = c.deptCode
+            and  a.completeSortation = '0'
+            and  a.tempSortation = '1'
+	</select>
+
+	<!--기안문서 반려함 출력  -->
+	<select id="getAllReturnDocument" resultType="documentVo">
+           select 
+		 	  c.documentNumber,
+               min(title) title,
+               (select contents from document where documentNumber = c.documentNumber) contents,
+               min(userId) userid,
+               min(referenceNumber) referenceNumber,
+               min(presentUser) presentUser,
+               min(documentType) documentType,
+               min(presentDate) presentDate,
+               min(presentDepartment) presentDepartment,
+               min(preservation) preservation
+           from (select 
+              			b.userNm userId,
+              			a.userId userId_1,
+                 		a.documentNumber referenceNumber
+                   from document_ref a, employee b 
+              	  where a.userid = b.userid
+                    and a.sortation = '반려'
+                    and  b.userId=#{userId}), document c
+          where referenceNumber = c.documentnumber
+          group by c.documentnumber
+	</select>
+	
+	
+	<!--기안문서 미결함 출력  -->
+	<select id="getAllUndecided" resultType="documentVo">
+          select 
+               c.documentNumber,
+               min(title) title,
+               (select contents from document where documentNumber = c.documentNumber) contents,
+               min(userId) userid,
+               min(referenceNumber) referenceNumber,
+               min(presentUser) presentUser,
+               min(documentType) documentType,
+               min(presentDate) presentDate,
+               min(presentDepartment) presentDepartment,
+               min(preservation) preservation
+          from
+              (select 
+                b.userNm userId,
+                a.documentNumber referenceNumber
+              from document_ref a, employee b 
+              where a.userid = b.userid
+                 and (a.sortation = '참조' or a.sortation= '0')
+                and b.userId=#{userId}), document c
+          where referenceNumber = c.documentnumber
+          group by c.documentnumber
+          
+        
+	</select>
+	
+		<!--기안문서 완료함 출력  -->
+	<select id="getAllComplete" resultType="documentVo">
+      select 
+               c.documentNumber,
+               min(title) title,
+               min(userId) userid,
+               (select contents from document where documentNumber = c.documentNumber) contents,
+               min(referenceNumber) referenceNumber,
+               min(presentUser) presentUser,
+               min(documentType) documentType,
+               min(presentDate) presentDate,
+               min(presentDepartment) presentDepartment,
+               min(preservation) preservation
+          from
+              (select 
+                b.userNm userid, 
+                a.documentNumber referenceNumber
+              from document_ref a, employee b 
+              where a.userid = b.userid
+               ) ref, document c ,(select dn1.documentnumber documentnumber
+                              from (select count(*) cnt, documentNumber
+                                        from document_ref 
+                                        where (sortation = '참조' or sortation= '완료')
+                                        group by documentNumber) dn1,
+                               (select count(*) cnt, documentNumber
+                                        from document_ref 
+                                        group by documentNumber)dn2
+                                where   dn1.documentnumber=dn2.documentnumber
+                                and     dn1.cnt = dn2.cnt) d
+          where referenceNumber = c.documentnumber
+          and   referenceNumber = d.documentnumber
+          and   presentUser = #{presentUser}
+          group by c.documentnumber
+          
+	</select>
+	
+	<!-- 기안 선택하여 가져오기 -->
+	<select id="selectDocument" resultType="documentVo" parameterType="map">
+		  select 
+     		   userId,
+   		       REFERENCENUMBER,
+               SORTATION,
+   			   documentType
+          from
+              (select 
+                b.userNm USERID,
+                a.DOCUMENTNUMBER REFERENCENUMBER,
+                a.SORTATION
+              from document_ref a, employee b
+              where a.userid = b.userid), document c
+          where REFERENCENUMBER = c.documentnumber
+          AND c.documentNumber= #{documentNumber}
+		
+</select>
+
+	<!-- 작성된 사람만 버튼 권한 부여하기-->
+	<select id="selectDocumentbyUser" resultType="documentVo" parameterType="documentVo">
+	select	
+        documentNumber,
+        title,
+        preservation,
+        presentDate,
+        contents,
+        tempSortation,
+        completeSortation,
+        presentUser,
+        presentDepartment,
+        documentType
+        from document
+       where documentNumber = #{documentNumber}
+         and presentUser =#{userId}
+	 </select>
+         
+         
+	<!--일반전표 장부반영 되었을 때 전표번호등록해주기  -->
+	<update id="updateDocument" parameterType="map">
+   update document set 
+        		  title = nvl(#{title, jdbcType=VARCHAR},null),
+           preservation = nvl(#{preservation, jdbcType=VARCHAR},null),
+       	    presentDate = nvl(#{presentDate, jdbcType=VARCHAR},null),
+      	       contents = nvl(#{contents, jdbcType=VARCHAR},null),
+       	  tempSortation = nvl(#{tempSortation, jdbcType=VARCHAR},null),
+      completeSortation = nvl(#{completeSortation, jdbcType=VARCHAR},null),
+       		presentUser = #{presentUser},
+      presentDepartment = #{presentDepartment},
+      	   documentType = nvl(#{documentType, jdbcType=VARCHAR},null)
+   			 	  where documentNumber = #{documentNumber}
+	</update>
+	
+	<!-- 기안 삭제 -->
+	<delete id="deleteDocument" parameterType="map">
+		delete from document
+		where documentNumber = #{documentNumber}
+	</delete>
+	
+	<!-- 기안서 검색 -->
+	<select id="searchDocument" parameterType="documentVo" resultType="documentVo">
+        select  a.documentNumber,
+                a.title,
+                a.preservation,
+                a.presentDate,
+                a.contents,
+                a.tempSortation,
+                a.completeSortation,
+                b.userNm presentUser,
+                c.deptname presentDepartment,
+                a.documentType
+         from  document a ,employee b, dept c
+         where  a.presentUser = b.userid
+		        and  a.presentDepartment = c.deptCode
+		        and  a.completeSortation = '1'
+		        and  a.tempSortation = '0'
+		        and  a.presentUser = #{presentUser}
+		        <if test="documentType!=null and !documentType.equals('')">
+		        and a.documentType = nvl(#{documentType,jdbcType=VARCHAR}, a.documentType)
+		        </if>
+		        <if test="title!=null and !title.equals('')">
+          	 	and a.title like '%' || #{title} || '%'
+                </if>
+		        <if test="startDate!=null">
+		        and to_date(a.presentDate,'yy/mm/dd') between to_date(#{startDate},'yy/mm/dd')
+		        and to_date(#{endDate},'yy/mm/dd')
+		        </if>
+	</select>
+	
+	<!-- 임시보관함 검색 -->
+	<select id="searchTemporarily" parameterType="documentVo" resultType="documentVo">
+	select  a.documentNumber,
+                a.title,
+                a.preservation,
+                a.presentDate,
+                a.presentDate,
+                a.contents,
+                a.tempSortation,
+                a.completeSortation,
+                b.userNm presentUser,
+                c.deptname presentDepartment,
+                a.documentType
+         from  document a ,employee b, dept c
+         where  a.presentUser = b.userid
+		        and  a.presentDepartment = c.deptCode
+		        and  a.completeSortation = '0'
+		        and  a.tempSortation = '1'
+		        and  a.presentUser = #{presentUser}
+		        <if test="documentType!=null and !documentType.equals('')">
+		        and a.documentType = nvl(#{documentType,jdbcType=VARCHAR}, a.documentType)
+		        </if>
+		        <if test="title!=null and !title.equals('')">
+          	 	and a.title like '%' || #{title} || '%'
+                </if>
+		        <if test="startDate!=null">
+		        and to_date(a.presentDate,'yy/mm/dd') between to_date(#{startDate},'yy/mm/dd')
+		        and to_date(#{endDate},'yy/mm/dd')
+		        </if>
+	</select>
+	
+	        
+	<!-- 미결함 검색 -->
+	<select id="searchUndecided" parameterType="documentVo" resultType="documentVo">
+		  select 
+               c.documentNumber,
+               min(title) title,
+               (select contents from document where documentNumber = c.documentNumber) contents,
+               min(userId) userid,
+               min(referenceNumber) referenceNumber,
+               min(presentUser) presentUser,
+               min(documentType) documentType,
+               min(presentDate) presentDate,
+               min(presentDepartment) presentDepartment,
+               min(preservation) preservation
+          from
+              (select 
+                b.userNm userId,
+                a.documentNumber referenceNumber
+              from document_ref a, employee b 
+              where a.userid = b.userid
+                and (a.sortation = '참조' or a.sortation= '0')
+                and b.userId=#{userId}), document c
+        	  where referenceNumber = c.documentnumber
+        	 <if test="documentType!=null and !documentType.equals('')">
+             and c.documentType = nvl(#{documentType,jdbcType=VARCHAR}, c.documentType)
+             </if>
+             <if test="title!=null and !title.equals('')">
+             and c.title like '%' || #{title} || '%'
+             </if>
+             <if test="startDate!=null">
+             and to_date(c.presentDate,'yy/mm/dd') between to_date(#{startDate},'yy/mm/dd')
+             and to_date(#{endDate},'yy/mm/dd')
+             </if>
+        	  group by c.documentnumber
+         
+            
+	</select>
+	
+	<!-- 반려함 검색 -->
+	<select id="searchReturn" parameterType="documentVo" resultType="documentVo">
+		 select 
+		 	  c.documentNumber,
+               min(title) title,
+               (select contents from document where documentNumber = c.documentNumber) contents,
+               min(userId) userid,
+               min(referenceNumber) referenceNumber,
+               min(presentUser) presentUser,
+               min(documentType) documentType,
+               min(presentDate) presentDate,
+               min(presentDepartment) presentDepartment,
+               min(preservation) preservation
+           from (select 
+              			b.userNm userId,
+              			a.userId userId_1,
+                 		a.documentNumber referenceNumber
+                   from document_ref a, employee b 
+              	  where a.userid = b.userid
+                    and a.sortation = '반려'
+                    and  b.userId=#{userId}), document c
+          where referenceNumber = c.documentnumber
+           <if test="documentType!=null and !documentType.equals('')">
+             and c.documentType = nvl(#{documentType,jdbcType=VARCHAR}, c.documentType)
+             </if>
+             <if test="title!=null and !title.equals('')">
+             and c.title like '%' || #{title} || '%'
+             </if>
+             <if test="startDate!=null">
+             and to_date(c.presentDate,'yy/mm/dd') between to_date(#{startDate},'yy/mm/dd')
+             and to_date(#{endDate},'yy/mm/dd')
+             </if>
+        	 group by c.documentnumber
+          
+	</select>
+	
+	<!-- 완료함 검색 -->
+	<select id="searchComplete" parameterType="documentVo" resultType="documentVo">
+	   select 
+               c.documentNumber,
+               min(title) title,
+               (select contents from document where documentNumber = c.documentNumber) contents,
+               min(userId) userid,
+               min(referenceNumber) referenceNumber,
+               min(presentUser) presentUser,
+               min(documentType) documentType,
+               min(presentDate) presentDate,
+               min(presentDepartment) presentDepartment,
+               min(preservation) preservation
+          from
+              (select 
+                b.userNm userid, 
+                a.documentNumber referenceNumber
+              from document_ref a, employee b 
+              where a.userid = b.userid
+               ) ref, document c ,(select dn1.documentnumber documentnumber
+                              from (select count(*) cnt, documentNumber
+                                        from document_ref 
+                                        where (sortation = '참조' or sortation= '완료')
+                                        group by documentNumber) dn1,
+                               (select count(*) cnt, documentNumber
+                                        from document_ref 
+                                        group by documentNumber)dn2
+                                where   dn1.documentnumber=dn2.documentnumber
+                                and     dn1.cnt = dn2.cnt) d
+          where referenceNumber = c.documentnumber
+          and   referenceNumber = d.documentnumber
+          and   presentUser = #{presentUser}
+         <if test="documentType!=null and !documentType.equals('')">
+             and documentType = nvl(#{documentType,jdbcType=VARCHAR}, documentType)
+             </if>
+             <if test="title!=null and !title.equals('')">
+             and title like '%' || #{title} || '%'
+             </if>
+             <if test="startDate!=null">
+             and to_date(presentDate,'yy/mm/dd') between to_date(#{startDate},'yy/mm/dd')
+             and to_date(#{endDate},'yy/mm/dd')
+             </if>
+        	  group by c.documentnumber
+          </select>
+</mapper>
+
+
+

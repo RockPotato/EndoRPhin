@@ -1,0 +1,186 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="client">
+	
+	<!-- 거래처 전체조회 -->
+	<select id="getAllClient" resultType="clientVo">
+        SELECT
+            CLIENTCODE, 
+            CLIENTNAME, 
+            SALESNUMBER, 
+            MANAGER, 
+            TELEPHONE, 
+            FAXNUMBER, 
+            MANAGEREMAIL, 
+            BUSINESS, 
+            PLACE, 
+            RELATE, 
+            BUSINESSTYPE, 
+            BANKNAME, 
+            ACCOUNTNUMBER, 
+            USESTATUS
+        FROM CLIENT
+        ORDER BY CLIENTCODE ASC
+	</select>
+	
+	<!-- 
+	거래처코드로 거래처 조죄하기
+	파라미터 타입 : map
+	파라미터 key : clientCode
+	 -->
+	<select id="getCodeClient" resultType="clientVo" parameterType="map">
+        SELECT
+            CLIENTCODE, 
+            CLIENTNAME, 
+            SALESNUMBER, 
+            MANAGER, 
+            TELEPHONE, 
+            FAXNUMBER, 
+            MANAGEREMAIL, 
+            BUSINESS, 
+            PLACE, 
+            RELATE, 
+            BUSINESSTYPE, 
+            BANKNAME, 
+            ACCOUNTNUMBER, 
+            USESTATUS
+        FROM CLIENT
+        WHERE CLIENTCODE = #{clientCode}
+	</select>
+	
+	
+	
+	<!-- 
+	거래처코드로 거래처 조죄하기
+	파라미터 타입 : map
+	파라미터 key : clientName
+	 -->
+	<select id="getNameClient" resultType="clientVo" parameterType="map">
+        SELECT
+            CLIENTCODE,
+            CLIENTNAME, 
+            SALESNUMBER, 
+            MANAGER, 
+            TELEPHONE, 
+            FAXNUMBER, 
+            MANAGEREMAIL, 
+            BUSINESS, 
+            PLACE, 
+            RELATE, 
+            BUSINESSTYPE, 
+            BANKNAME, 
+            ACCOUNTNUMBER, 
+            USESTATUS
+        FROM CLIENT
+        WHERE CLIENTNAME LIKE  '%' || #{clientName} || '%'
+	</select>
+	
+	
+	<!-- 
+	거래처코드로 거래처 조죄하기
+	파라미터 타입 : map
+	파라미터 key : clientName
+	파라미터 key : clientCode
+	 -->
+	<select id="getBothClient" resultType="clientVo" parameterType="map">
+        SELECT
+            CLIENTCODE, 
+            CLIENTNAME, 
+            SALESNUMBER, 
+            MANAGER, 
+            TELEPHONE, 
+            FAXNUMBER, 
+            MANAGEREMAIL, 
+            BUSINESS, 
+            PLACE, 
+            RELATE, 
+            BUSINESSTYPE, 
+            BANKNAME, 
+            ACCOUNTNUMBER, 
+            USESTATUS
+        FROM CLIENT
+        WHERE CLIENTNAME LIKE  '%' || #{clientName} || '%'
+        		AND CLIENTCODE = #{clientCode}
+	</select>
+	
+	<!-- 거래처 등록하기 -->
+	<insert id="insertClient" parameterType="clientVo">
+		INSERT INTO CLIENT
+            (
+            CLIENTCODE, 
+            CLIENTNAME, 
+            SALESNUMBER, 
+            MANAGER, 
+            TELEPHONE, 
+            FAXNUMBER, 
+            MANAGEREMAIL, 
+            BUSINESS, 
+            PLACE, 
+            RELATE, 
+            BUSINESSTYPE, 
+            BANKNAME, 
+            ACCOUNTNUMBER, 
+            USESTATUS
+            )	
+		VALUES
+            (
+            #{clientCode},
+            #{clientName},
+            #{salesNumber},
+            #{manager},
+            #{telephone},
+            #{faxNumber},
+            #{managerEmail},
+            #{business},
+            #{place},
+            #{relate},
+            #{businessType},
+            #{bankName},
+            #{accountNumber},
+            1
+            )
+            
+	</insert>
+	
+	
+	<!-- 거래처 수정하기 -->
+	<update id="updateClient" parameterType="clientVo">
+		UPDATE CLIENT
+		SET 
+		    CLIENTNAME = #{clientName}, 
+		    SALESNUMBER = #{salesNumber}, 
+		    MANAGER = #{manager}, 
+		    TELEPHONE = #{telephone}, 
+		    FAXNUMBER = #{faxNumber}, 
+		    MANAGEREMAIL = #{managerEmail}, 
+		    BUSINESS = #{business}, 
+		    PLACE = #{place}, 
+		    RELATE = #{relate}, 
+		    BUSINESSTYPE = #{businessType}, 
+		    BANKNAME = #{bankName}, 
+		    ACCOUNTNUMBER = #{accountNumber}, 
+		    USESTATUS = #{useStatus}
+		WHERE CLIENTCODE = #{clientCode}
+	</update>
+	
+	
+	
+	<!-- 
+	거래처코드로 거래처 조죄하기
+	파라미터 타입 : map
+	파라미터 key : clientCode
+	 -->
+	<delete id="deleteClient" parameterType="map">
+	DELETE 
+	FROM Client
+	WHERE clientCode=#{clientCode}
+	</delete>
+	
+	
+
+</mapper>
+
+
+

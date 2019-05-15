@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="deposit">
+
+
+	<!-- 예수금 입력 -->
+	<insert id="insertDeposit" parameterType="depositVo">
+		insert into deposit
+		(depositcode, comaccount, departmentcode, depositdate, depositprice, companycard)
+		values
+		(#{depositcode},#{comaccount},#{departmentcode},
+		sysdate,#{depositprice},#{companycard})
+
+	</insert>
+
+
+	<!-- 예수금 전체 불러오기 -->
+	<select id="getAllDeposit" resultType="depositVo">
+		select
+		depositcode, comaccount, departmentcode, depositdate, depositprice, companycard
+		from deposit
+	</select>
+
+
+	<!-- 예수금 선택하여 가져오기 -->
+	<select id="selectDeposit" resultType="depositVo"
+		parameterType="map">
+		select
+		depositcode, comaccount, departmentcode, depositdate, depositprice, companycard
+		from
+		deposit where depositcode = #{depositcode}
+	</select>
+
+
+	<!-- 예수금 삭제 -->
+	<delete id="deleteDeposit" parameterType="map">
+		delete from deposit
+		where depositcode = #{depositcode}
+	</delete>
+
+
+</mapper>
+
+
+

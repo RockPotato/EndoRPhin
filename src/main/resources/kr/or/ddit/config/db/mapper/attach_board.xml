@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="attach_board">
+	
+	<!-- 첨부파일 등록 -->
+	<insert id="attachInsert" parameterType="attach_boardVo">
+		insert into attach_board
+		 		 (attachcode,
+				  attachname,
+				  attachrealpath,
+				  attachrealname,
+				  boardno)
+										  
+		    values (
+		           attachcode_seq.nextval,
+   		  		   #{attachName, jdbcType=NULL},
+	 			   #{attachRealpath, jdbcType=NULL},
+	 			   #{attachRealname, jdbcType=NULL},
+<!-- 	 			   #{boardNo} -->
+	 	  		   boardNo_seq.currval
+	 	  		   )
+	</insert>
+	
+	<!-- 	파일정보 수정 -->
+	<update id="attachUpdate" parameterType="attach_boardVo">
+		insert into attach_board
+		 		 (attachcode,
+				  attachname,
+				  attachrealpath,
+				  attachrealname,
+				  boardno)
+										  
+		    values (
+		           attachcode_seq.nextval,
+   		  		   #{attachName, jdbcType=NULL},
+	 			   #{attachRealpath, jdbcType=NULL},
+	 			   #{attachRealname, jdbcType=NULL},
+	 	  		   #{boardNo}
+	 	  		   )
+	</update>
+	
+	<!-- 게시글 번호 별 첨부파일 조회 -->
+	<select id="attachBoardNoSelect" resultType="attach_boardVo" parameterType="String">
+		select attachcode,
+			   attachname,
+			   attachrealpath,
+			   attachrealname,
+			   boardno
+			   
+		  from attach_board
+		
+		 where boardno = #{boardNo}
+		 order by attachCode
+	</select>
+	
+	<!-- 첨부파일 번호 조회 -->
+	<select id="attachCodeSelectOne" resultType="attach_boardVo" parameterType="String">
+		select attachcode,
+			   attachname,
+			   attachrealpath,
+			   attachrealname,
+			   boardno
+			   
+		  from attach_board
+		
+		 where attachCode = #{attachCode}
+	</select>
+	
+	<!-- 첨부파일 삭제 -->
+	<delete id="attach_boardDelete" parameterType="String">
+		delete from attach_board
+		
+		 where attachCode = #{attachCode}
+	</delete>
+	
+	<select id="attachBoardFileList" resultType="attach_boardVo" parameterType="String">
+		select attachcode,
+			   attachname,
+			   attachrealpath,
+			   attachrealname,
+			   boardno
+			   
+		  from attach_board
+		
+		 where boardno = #{boardNo}
+		 order by attachCode desc
+	</select>
+	
+	
+</mapper>
+
+
+

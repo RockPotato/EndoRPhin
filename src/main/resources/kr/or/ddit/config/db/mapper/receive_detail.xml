@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="receive_detail">
+	<!-- 창고 입출고 이력 입력 -->
+	<insert id="insertReceive_detail" parameterType="receive_detailVo">
+		insert into receive_detail
+		(receivecode, productcode,quantity)
+		values
+		(#{receiveCode},#{productCode},#{quantity})
+	</insert>
+	
+	<select id="getReceive_detail" parameterType="map" resultType="receive_detailVo">
+		select	receivecode, rd.productcode,quantity,productname,p.standard,p.baseprice
+		from	receive_detail rd , product p
+		where	rd.productcode= p.productcode
+		and		receivecode = #{receiveCode}
+	</select>
+	
+	<delete id="deleteReceive_detail" parameterType="map">
+		delete from receive_detail
+		where	receivecode = #{receiveCode}
+		<if test="productCode!=null">
+			and	productcode = #{productCode}
+		</if>
+	</delete>	
+</mapper>
+
+
+

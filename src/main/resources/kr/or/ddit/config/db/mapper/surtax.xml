@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="surtax">
+
+
+<!-- 부가 가치세 입력 -->
+	<insert id="insertSurtax" parameterType="surtaxVo">
+		insert into surtax
+		(surtaxnumber, buyingtax, salestax, calculatetax)
+		values
+		(#{surtaxnumber},#{buyingtax},#{salestax},#{calculatetax})
+
+	</insert>
+
+
+	<!-- 부가 가치세 전체 불러오기 -->
+	<select id="getAllSurtax" resultType="surtaxVo">
+		select
+		surtaxnumber, buyingtax, salestax, calculatetax
+		from surtax
+	</select>
+
+
+	<!-- 부가 가치세 선택하여 가져오기 -->
+	<select id="selectSurtax" resultType="surtaxVo"
+		parameterType="String">
+		select
+		surtaxnumber, buyingtax, salestax, calculatetax
+		from
+		surtax where surtaxnumber = #{surtaxnumber}
+	</select>
+
+
+	<!-- 부가 가치세 삭제 -->
+	<delete id="deleteSurtax" parameterType="String">
+		delete from surtax
+		where surtaxnumber = #{surtaxnumber}
+	</delete>
+
+
+</mapper>
+
+
+

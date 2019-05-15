@@ -1,0 +1,133 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="slip">
+
+	<!-- 일반전표 입력 -->
+	<insert id="insertSlip" parameterType="slipVo">
+		<selectKey order="BEFORE" keyProperty="slipNumber" resultType="String">
+			SELECT slip_seq.nextval
+			from	dual
+		</selectKey>
+		insert into slip
+		(slipnumber, total, slipDate, departmentname, jukyo, status)
+		values
+		(#{slipNumber}
+		,#{total}
+		,#{slipDate}
+		,nvl(#{departmentName, jdbcType=VARCHAR},'미등록')
+		,nvl(#{jukyo, jdbcType=VARCHAR},'미등록')
+		,nvl(#{status,jdbcType=VARCHAR},'0'))
+	</insert>
+	
+	<!-- 시퀀스 값 불러오기 -->
+	<select id="currvalSeq" resultType="String">
+		select slip_seq.currval 
+		from dual
+	</select>
+
+
+	<!-- 일반전표 전체 불러오기 -->
+	<select id="getAllSlip" resultType="slipVo">
+		select
+		slipnumber, total, slipdate, departmentname, jukyo, status
+		from slip
+		order by slipnumber desc
+	</select>
+
+
+	<!-- 일반전표 선택하여 가져오기 -->
+	<select id="selectSlip" resultType="slipVo"
+		parameterType="String">
+		select
+		slipnumber, total, slipdate, departmentname, jukyo, status
+		from
+		slip where slipnumber = #{slipNumber}
+	</select>
+
+
+	<!-- 일반전표 삭제 -->
+	<delete id="deleteSlip" parameterType="String">
+		delete from slip
+		where slipnumber = #{slipNumber}
+	</delete>
+	
+	<!-- 전체 전표 수 조회 -->
+	<select id="getSlipCnt" resultType="Integer" parameterType="map">
+		select count(*)
+ 		  from slip
+ 		  <if test="value!=null">
+ 		  where	status = #{status}
+ 		  </if>
+	</select>
+	
+	<select id="getSlipMax" resultType="Integer">
+		select max(slipNumber)
+		   from slip
+	</select>	
+	
+	<!-- 페이징처리를 위한 조회 -->
+	<select id="selectSlipPagingList" resultType="slipVo" parameterType="pageVo">
+		select *
+		  from
+			  (select a.*, rownum rn
+				 from
+					 (select slip.*
+						from slip
+						<if test="boardTypeCode!=null">
+						where   slip.status=#{boardTypeCode}
+						</if>
+					  order by slipNumber desc) a ) a
+		 where rn between (#{page}-1)*#{pageSize}+1 and #{page}*#{pageSize}
+	</select>
+	
+	<update id="finalSaveSlip" parameterType="slipVo">
+		UPDATE SLIP
+			SET STATUS = '0',
+				TOTAL = #{total },
+				SLIPDATE = #{slipDate },
+				DEPARTMENTNAME = #{departmentName },
+				JUKYO = #{jukyo }
+			WHERE SLIPNUMBER = #{slipNumber }
+	
+	</update>
+	
+	
+	<!--승인-> 미사용으로 변경 -->
+	<update id="updateSlip" parameterType="String">
+	update slip 
+			set status= '0' 
+		where slipNumber=#{slipNumber}
+	</update>
+	
+	<!--미사용-> 승인으로 변경  -->
+	<update id="updateSlip_paaprovuar" parameterType="String">
+	update slip 
+			set status= '1' 
+		where slipNumber=#{slipNumber}
+	</update>
+	
+	
+	<!-- 날짜검색 승인 상태만 출력  -->
+	<select id="getBetweenSlip" resultType="slipVo" parameterType="map">
+	select slipnumber, total, slipdate, departmentName, jukyo, status as all_slip
+		from slip 
+		where to_date(slipDate,'yy/mm/dd') between to_date(#{pre_date},'yy/mm/dd')
+		and to_date(#{post_date},'yy/mm/dd')
+		and status= '1' 
+	</select>
+	
+	<!-- 날짜검색 미승인 상태만 출력  -->
+	<select id="getBetweenSlip_zero" resultType="slipVo" parameterType="map">
+	select slipnumber, total, slipdate, departmentName, jukyo, status as all_slip
+		from slip 
+		where to_date(slipDate,'yy/mm/dd') between to_date(#{pre_date},'yy/mm/dd')
+		and to_date(#{post_date},'yy/mm/dd')
+		and status= '0' 
+	</select>
+	
+</mapper>
+
+
+

@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="images">
+
+<!-- 이미지 입력 -->
+	<insert id="insertImages" parameterType="imagesVo">
+		<selectKey keyProperty="imageCode" resultType="String" order="BEFORE">
+		  	select 
+		  		IMAGES_SEQ.NEXTVAL
+		  	from 
+		  		dual
+	    </selectKey>
+		insert into images
+		(imagecode, imagename, imagerealpath, imagerealname, usename, userid)
+		values
+		(#{imageCode}
+		,#{imageName}
+		,#{imageRealpath}
+		,#{imageRealname}
+		,nvl(#{userName, jdbcType=VARCHAR},null)
+		,nvl(#{userId, jdbcType=VARCHAR},null))
+	</insert>
+
+	<!-- 이미지 전체 불러오기 -->
+	<select id="getAllImages" resultType="imagesVo">
+		select
+		imagecode, imagename, imagerealpath, imagerealname, usename, userid
+		from images
+	</select>
+
+
+	<!-- 이미지 선택하여 가져오기 -->
+	<select id="selectImages" resultType="imagesVo"
+		parameterType="map">
+		select
+		imagecode, imagename, imagerealpath, imagerealname, usename, userid
+		from
+		images where imagecode = #{imageCode}
+	</select>
+
+
+	<!-- 이미지 삭제 -->
+	<delete id="deleteImages" parameterType="map">
+		delete from images
+		where imagecode = #{imageCode}
+	</delete>
+	
+	<update id="updateImages" parameterType="imagesVo">
+		update images
+		set		imageName = nvl(#{imageName, jdbcType=VARCHAR},imagename)
+				,imagerealpath = nvl(#{imageRealpath, jdbcType=VARCHAR},imagerealpath)
+				,imagerealname = nvl(#{imageRealname, jdbcType=VARCHAR},imagerealname)
+		where	imagecode = #{imageCode}
+	</update>
+	
+	
+</mapper>
+
+
+

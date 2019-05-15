@@ -1,0 +1,279 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="payment">
+
+	<!-- 개월 차이 구하기 같은 월에 급여 이력이 있으면 등록 못하게 하기 위함 -->
+	<select id="searchPaymentDupl" resultType="String" parameterType="paymentVo"> 
+		select	to_char(payday,'yyyy-MM-dd')
+		from	payment
+		where   payday between trunc(to_date(#{payDay}),'MM') and last_day(to_date(#{payDay}))
+		and		userid=#{userId}
+	</select>
+
+	<!-- 급여 입력 -->
+	<insert id="insertPayment" parameterType="paymentVo">
+		insert into payment
+		(paycode, userid, totalwage, totalsalary, relate, payday,taxamount)
+		values
+		((select max(paycode)+1 from payment),#{userId}
+		,nvl((select sum(deductpay)
+							from payment_detail pd, de_product_div dpd
+							where   pd.deductcode=dpd.deductcode
+							and     dpd.deprostatus='2'
+							and     pd.paycode=(select max(paycode)+1 from payment)),0)
+		,nvl((select sum(deductpay)
+							from payment_detail pd, de_product_div dpd
+							where   pd.deductcode=dpd.deductcode
+							and     dpd.deprostatus='1'
+							and     pd.paycode=(select max(paycode)+1 from payment)),0)
+		,nvl(#{relate, jdbcType=VARCHAR},null)
+		,to_date( nvl(#{payDay, jdbcType=VARCHAR},null),'yyyyMMdd')
+		,nvl(#{taxamount, jdbcType=VARCHAR},null)
+		)
+	</insert>
+	
+	<update id="updatePayment" parameterType="paymentVo">
+		update  payment
+		set	 
+		totalwage = nvl((select sum(deductpay)
+							from payment_detail pd, de_product_div dpd
+							where   pd.deductcode=dpd.deductcode
+							and     dpd.deprostatus &lt;&gt; '1'
+							and     pd.paycode=#{payCode}),0)
+		,totalsalary = nvl((select sum(deductpay)
+							from payment_detail pd, de_product_div dpd
+							where   pd.deductcode=dpd.deductcode
+							and     dpd.deprostatus='1'
+							and     pd.paycode=#{payCode}),0)
+		, relate=nvl(#{relate, jdbcType=VARCHAR},relate)
+		, payday=nvl( to_date(#{payDay, jdbcType=VARCHAR},'yyyyMMdd'),payday)
+		<if test="taxamount!=null">
+		, taxamount=#{taxamount}
+		</if>
+		where   paycode = #{payCode}
+	</update>
+
+	<!-- 급여  전체 불러오기 -->
+	<select id="getAllPayment" resultType="paymentVo">
+		select
+		paycode, userid, totalwage, totalsalary, relate, 
+		nvl(to_char(payday,'yyyy-MM-dd'),'미정') payday,taxamount
+		from payment
+	</select>
+
+
+	<!-- 급여 선택하여 가져오기 -->
+	<select id="selectPayment" resultType="paymentVo"
+		parameterType="map">
+		select
+		paycode, userid, totalwage, totalsalary, relate, 
+		nvl(to_char(payday,'yyyy-MM-dd'),'미정') payday,taxamount
+		from
+		payment where paycode = #{paycode}
+	</select>
+
+
+	<!-- 급여 삭제 -->
+	<delete id="deletePayment" parameterType="map">
+		delete from payment
+		where paycode = #{paycode}
+	</delete>
+	
+	<!-- 급여 선택하여 가져오기 -->
+	<select id="getPayment_u" resultType="paymentVo"
+		parameterType="map">
+		select
+		paycode, userid, totalwage, totalsalary, relate, 
+		nvl(to_char(payday,'yyyy-MM-dd'),'미정') payday,taxamount
+		from
+		payment where userid = #{userId}
+	</select>
+
+	<!-- 급여 리스트 가져오기 -->
+	<select id="getPaymentList" resultType="paymentVo" parameterType="pageVo">
+	select *
+		  from
+			  (select a.*, rownum rn
+				 from
+					 (select  e.userid,nvl(po.positionname,'미정') positionname,
+		        e.usernm,
+		        nvl(d.deptname,'미정') deptname,
+		        nvl(p.totalsalary,0) totalsalary,
+		        nvl(p.totalwage,0) totalwage,
+		        to_char(e.joincompany,'yyyy-MM-dd') joincompany
+				from    employee e left outer join 
+				        (select  userid,sum(totalwage) totalwage,sum(totalsalary) totalsalary
+				        from    payment
+                        where   payday in (select max(payday) from payment group by userid)
+                        group  by userid) p
+				on   e.userid=p.userid
+				left outer join position po
+				on e.positioncode=po.positioncode
+				left outer join dept d
+				on d.deptcode=e.deptcode
+				order by joincompany desc) a ) a
+		 where rn between (#{page}-1)*#{pageSize}+1 and #{page}*#{pageSize}
+	</select>
+	
+	<!-- 급여 리스트 사원명으로 검색 -->
+	<select id="getPaymentListByUserNm" resultType="paymentVo"
+	parameterType="map">
+		select  e.userid,nvl(po.positionname,'미정') positionname,
+		        e.usernm,
+		        nvl(d.deptname,'미정') deptname,
+		        nvl(p.totalwage,0) totalwage,
+		        nvl(p.totalsalary,0) totalsalary,
+		        to_char(e.joincompany,'yyyy-MM-dd') joincompany,taxamount,payday
+		from    employee e left outer join 
+		        (select  userid,max(payday) payday
+                ,max(totalwage) totalwage
+                ,max(totalsalary) totalsalary
+                ,max(taxamount) taxamount
+		        from payment 
+                group by userid) p
+		on   e.userid=p.userid
+		left outer join position po
+		on e.positioncode=po.positioncode
+		left outer join dept d
+		on d.deptcode=e.deptcode
+		where   e.usernm like '%'||#{usernm}||'%'
+	</select>
+	
+	<!-- 새로운 급여의 인덱스를 추가 -->
+	<select id="getMaxPayment" resultType="String">
+		select max(paycode)
+		from payment
+	</select>
+	
+	<!-- 기간별 급여의 총합을 구하기 위함 -->
+	<select id="selectTotalSalaryByDay" resultType="paymentVo" parameterType="map">
+		select sum(totalsalary) totalsalary,sum(totalwage) totalwage
+		,to_char(paymentdate,'yyyy-MM-dd') payday,min(deadline) deadline
+		from (select p.paycode, userid, totalwage, totalsalary, relate, 
+		nvl(to_char(payday,'yyyy-MM-dd'),'미정') payday,taxamount,pr.paymentdate,pr.deadline
+                                    from payment_report pr , payment p
+                                    where   p.paycode = pr.paycode) p
+		<if test="value!=null">
+			where paymentdate between to_date(#{payDay},'yyyyMM') 
+			    and LAST_DAY(to_date(#{payDay},'yyyyMM'))
+	    </if>
+		group by to_char(paymentdate,'yyyy-MM-dd')
+	</select>
+	
+	<!-- 날짜 기간별과 유저 아이디로 검색 -->
+	<select id="selectPersonalPaymentList" parameterType="map" resultType="paymentVo">
+		select u.userid, u.usernm, to_char(p.paymentdate,'yyyy-MM-dd') payday,d.deptname
+        ,totalsalary,totalwage,taxamount
+		from employee u,(select p.*,pr.paymentdate 
+                                    from payment_report pr , payment p
+                                    where   p.paycode = pr.paycode) p,dept d
+		where   u.userid=p.userid
+		and     d.deptcode=u.deptcode
+		<if test="paydayTo!=null">
+		and     paymentdate between to_date(#{paydayTo})
+		                and to_date(#{paydayFrom})
+        </if>
+        <if test="paydayTo==null">
+        and     paymentdate between add_months(sysdate,-1)
+		                and sysdate
+        </if>
+		<if test="userid!=null">
+			and		u.usernm like '%'||#{userid}||'%'
+		</if>
+	</select>
+	<!-- 년도별 검색 -->
+	<select id="selectYearPaymentList" parameterType="map" resultType="paymentVo">
+		select u.userid, min(u.usernm) usernm,min(deptname) deptname
+	        ,sum(totalsalary) totalsalary,sum(totalwage) totalwage
+		from employee u left outer join (select p.*,pr.paymentdate 
+                                    from payment_report pr , payment p
+                                    where   p.paycode = pr.paycode) p   
+		on   u.userid=p.userid
+		left outer join dept d
+		on   u.deptcode=d.deptcode
+		where   to_char(payday,'yyyy')=#{paydayYear}
+		<if test="userid!=null">
+		and		u.usernm like '%'||#{userid}||'%'
+		</if>
+		group   by u.userid
+	</select>
+	
+	<!-- 사원번호와 날짜로  급여번호를 가져옴-->
+	<select id="paycodeByIdnDay" parameterType="paymentVo" resultType="String">
+		select  paycode
+		from    (select p.*,pr.paymentdate 
+                                    from payment_report pr , payment p
+                                    where   p.paycode = pr.paycode)
+		where   userid =#{userId}
+		and     paymentdate like to_date(#{payDay})
+	</select>
+	
+	<!-- 연도별 급여 조회 부분 상세정보를 가져오기 위함 -->
+	<select id="selectYearPaymentListDetail" parameterType="map" resultType="paymentVo">
+		select u.userid, u.usernm,deptname deptname,positionname,to_char(paymentdate,'yyyy-MM-dd') payday
+        ,totalsalary,totalwage,paycode,taxamount
+		from employee u left outer join (select p.*,pr.paymentdate 
+                                    from payment_report pr , payment p
+                                    where   p.paycode = pr.paycode) p
+		on   u.userid = p.userid
+		left outer join position p1
+		on   u.positioncode = p1.positioncode
+		left outer join dept d
+		on   u.deptcode=d.deptcode
+		<if test="userid!=null">
+		where   to_char(paymentdate,'yyyy')=#{paydayYear}
+		and    u.userid=#{userid}
+		</if>
+		<if test="userid==null">
+		where   to_char(paymentdate,'yyyyMM')=#{paydayYear}
+		</if>
+	</select>
+	
+	<!-- 소득세를 가져오기 위함 -->
+	<select id="selectincometax" parameterType="map" resultType="String">
+		select min(taxpay)
+		from incometax
+		where   taxafter>#{value}
+	</select>
+	
+	<!-- 부서별  -->
+	<select id="selectDeptNPayment" parameterType="map" resultType="paymentVo">
+		select d.deptcode, min(deptname) deptname,sum(totalsalary) totalsalary
+		from dept d,employee e, (select p.*,pr.paymentdate 
+                                    from payment_report pr , payment p
+                                    where   p.paycode = pr.paycode) p
+		where   e.deptcode = d.deptcode
+		and     e.userid = p.userid
+		and     to_char(paymentdate,'yyyyMM')=#{paydayMonth}
+		group by d.deptcode
+	</select>
+	
+	<!-- 전체 급여 등록 수 조회 -->
+	<select id="getPaymentCnt" resultType="Integer">
+		select count(*)
+ 		  from employee
+	</select>
+	
+	<select id="getPaymentForAdjust" resultType="paymentVo" parameterType="map">
+		select PAYCODE,    
+		p.USERID      ,
+		TOTALSALARY  , 
+		p.RELATE   ,
+		PAYDAY   ,
+		TOTALWAGE,
+		TAXAMOUNT,e.usernm
+		from payment p join employee e
+		on	p.userid = e.userid
+		where payday in 
+		(select max(payday) from payment
+		<if test="value!=null">
+			where payday&lt;to_date(#{payDay},'yyyy-MM-dd')
+		</if>
+		 group by userid)
+	</select>
+</mapper>
+
+
+

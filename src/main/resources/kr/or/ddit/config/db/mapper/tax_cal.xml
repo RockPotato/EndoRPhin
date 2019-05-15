@@ -1,0 +1,188 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="tax_cal">
+
+
+
+	<!-- 매입매출세금계산서 불러오기 -->
+	<select id="getAllTax_cal" resultType="tax_calVo">
+		select
+		salescode, slipdate, supplyvalue, salesstatus, deptcode, surtax, ordercode, clientname, sumvalue, auto, entryType
+		from tax_cal
+	</select>
+
+
+	<!-- 매입매출세금계산서 선택해서 가져오기 -->
+	<select id="selectTax_cal" resultType="tax_calVo"
+		parameterType="String">
+		selectF
+		salescode, slipdate, supplyvalue, salesstatus, deptcode, surtax, ordercode, clientname, sumValue, auto, entryType
+		from
+		tax_cal where salescode = #{salescode}
+	</select>
+
+
+	<!-- 매입매출세금계산서 삭제 -->
+	<delete id="deleteTax_cal" parameterType="String">
+		delete from tax_cal
+		where salescode = #{salesCode}
+	</delete>
+	
+	<!-- 페이징처리를 위한 조회 -->
+	<select id="selecTax_calPagingList" resultType="tax_calVo" parameterType="pageVo">
+	select *
+		  from
+			  (select a.*, rownum rn
+				 from
+					 (select tax_cal.*
+						from tax_cal
+					  order by salescode desc) a ) a
+		 where rn between (#{page}-1)*#{pageSize}+1 and #{page}*#{pageSize}
+	</select>
+	
+	<!-- 날짜별 검색 후 페이징처리를 위한 조회 -->
+	<select id="selecTax_calPagingList_search" resultType="tax_calVo" parameterType="pageVo">
+	select *
+		  from
+			  (select a.*, rownum rn
+				 from
+					 (select tax_cal.*
+						from tax_cal
+					  order by salescode) a ) a
+		 where rn between (#{page}-1)*#{pageSize}+1 and #{page}*#{pageSize}
+		  AND to_date(slipdate, 'yy/mm/dd') between to_date(#{startDate}, 'yy/mm/dd') and to_date(#{endDate}, 'yy/mm/dd')
+	</select>
+	
+	
+	
+	<!-- 카운트 구하기 -->
+	<select id="getTax_calCnt" resultType="Integer">
+		select count(*)
+		from tax_cal
+	</select>
+	
+	
+	<!-- 카운트 구하기 검색 -->
+	<select id="getTax_calCnt_search" resultType="Integer">
+		select count(*)
+		from tax_cal
+		where to_date(slipdate, 'yy/mm/dd') between to_date(#{startDate}, 'yy/mm/dd') and to_date(#{endDate}, 'yy/mm/dd')
+	</select>
+	
+	
+	
+
+
+	<select id="getTax_seqNextval" resultType="String">
+		select 
+       		 tax_seq.nextval
+  		 from dual
+	</select>
+
+
+	<insert id="insertTax_cal" parameterType="tax_calVo">
+		insert into tax_cal
+  			 (SALESCODE, SLIPDATE, SUPPLYVALUE, SALESSTATUS, DEPTCODE, SURTAX, ORDERCODE, CLIENTNAME, SUMVALUE, AUTO, ENTRYTYPE)
+		VALUES
+		     (#{salesCode}, #{slipDate}, #{nSupplyValue}, #{salesStatus},
+		     nvl(#{deptCode, jdbcType=VARCHAR},null)
+		     , #{nSurtax}
+		     , nvl(#{orderCode, jdbcType=VARCHAR},null)
+		     , #{clientName}
+		     , #{nSumValue},
+		     nvl(#{auto, jdbcType=VARCHAR},null)
+		     ,nvl(#{entryType, jdbcType=VARCHAR},null))
+	</insert>
+
+
+	<update id="updateTaX_cal" parameterType="tax_calVo">
+		UPDATE TAX_CAL
+		SET SUPPLYVALUE = #{nSupplyValue},
+			SURTAX = #{nSurtax},
+			SUMVALUE = #{nSumValue}
+		WHERE SALESCODE = #{salesCode}
+	
+	</update>
+	<sql id="sqlTax_cal">
+		select
+		salescode, slipdate, supplyvalue, salesstatus, deptcode, surtax, ordercode, clientname, sumvalue, auto, entryType
+		from tax_cal
+	</sql>
+	
+	<sql id="sumsqlTax_cal">
+		select
+		nvl(sum(supplyvalue),0) supplyvalue,nvl(sum(surtax),0) surtax, nvl(sum(sumvalue),0) sumvalue
+		from tax_cal
+	</sql>
+	
+	<select id="searchAllByType" resultType="tax_calVo">  
+		<if test="sumCheck==null">
+			<include refid="sqlTax_cal" />
+		</if>  
+		<if test="sumCheck!=null">
+			<include refid="sumsqlTax_cal" />
+		</if>  
+		where (salesstatus = '과세매입'
+	        or salesstatus ='영세율'
+	        or salesstatus ='계산서'
+	        or salesstatus ='불공'
+	        or salesstatus ='수입분'
+	        or salesstatus ='금전등록'
+	        or salesstatus ='카드과세'
+	        or salesstatus ='카드면세'
+	        or salesstatus ='카드영세'
+	        or salesstatus ='무증빙'
+	        or salesstatus ='현금과세'
+	        or salesstatus ='현금면세')
+        <if test="searchMonth!=null">
+	        and   to_char(slipdate,'yyyyMM')=#{searchMonth}
+        </if>
+        
+	</select>
+	
+	
+	<select id="searchAllByType2" resultType="tax_calVo" parameterType="map">
+		<if test="sumCheck==null">
+			<include refid="sqlTax_cal" />
+		</if>  
+		<if test="sumCheck!=null">
+			<include refid="sumsqlTax_cal" />
+		</if>  
+		where salesstatus like '%매출'
+        <if test="searchMonth!=null">
+	        and   to_char(slipdate,'yyyyMM')=#{searchMonth}
+        </if>
+	</select>
+	
+	
+	<select id="searchAllByType51" parameterType="map" resultType="tax_calVo">  
+		<if test="sumCheck==null">
+			<include refid="sqlTax_cal" />
+		</if>  
+		<if test="sumCheck!=null">
+			<include refid="sumsqlTax_cal" />
+		</if>  
+		where salesstatus = #{searchData2}
+        <if test="searchMonth!=null">
+	        and   to_char(slipdate,'yyyyMM')=#{searchMonth}
+        </if>
+        
+	</select>
+
+	<select id="selectBy51" parameterType="map" resultType="map" >
+			select
+			NVL(sum(SUPPLYVALUE), 0) as supplyValue,
+	        NVL(sum(SURTAX), 0) as surtax,
+            NVL(salesstatus, '없음') as salesstatus
+		    from tax_cal
+		    where to_date(slipdate, 'yy-mm-dd') between to_date(#{startDate}, 'yy-mm-dd') and to_date(#{endDate}, 'yy-mm-dd')
+	        group by salesstatus
+	        order by salesstatus
+        
+	</select>
+</mapper>
+
+
+

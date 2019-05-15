@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="document_ref">
+
+	<!-- 기안참조 입력 -->
+	<insert id="insertDocument_ref" parameterType="document_refVo">
+		insert into document_ref
+		(referencenumber, documentnumber, userid, sortation)
+		values
+		(documentRef_seq.nextval,
+		nvl(#{documentNumber, jdbcType=VARCHAR},null)
+		,nvl(#{userId, jdbcType=VARCHAR},null),
+		nvl(#{sortation, jdbcType=VARCHAR},null))
+
+	</insert>
+	
+	<!-- 기안참조 전체 불러오기 -->
+	<select id="getAllDocument_ref" resultType="document_refVo">
+		select
+		referencenumber, documentnumber, userid, sortation
+		from document_ref
+	</select>
+
+
+
+	<!-- 기안참조 선택하여 가져오기 -->
+	<select id="selectDocument_ref" resultType="document_refVo"	parameterType="map">
+		select
+	 		 referencenumber, documentNumber, userId, sortation
+		from document_ref 
+	   where documentNumber = nvl(#{documentNumber, jdbcType=VARCHAR},documentNumber)
+		 and  userId = #{userId}
+	</select>
+
+    <select id="selectDocument_refNumber" resultType="document_refVo"	parameterType="map">
+		select
+	 		 referencenumber, documentNumber, dr.userId, sortation,usernm
+		from document_ref dr, employee e
+        where   e.userid=dr.userid
+		   and documentNumber =  #{documentNumber} 
+		   order by sortation
+	</select>
+	<!-- 기안참조 삭제 -->
+	<delete id="deleteDocument_ref" parameterType="map">
+		delete from document_ref
+		where documentNumber = #{documentNumber}
+	</delete>
+	
+	<update id="updateDocument_ref" parameterType="document_refVo">
+	
+	   update document_ref set 
+        		 userId = nvl(#{userId, jdbcType=VARCHAR},null),
+              sortation = nvl(#{sortation, jdbcType=VARCHAR},null)
+   			      where referenceNumber = #{referenceNumber}
+   			 	  
+	</update>
+
+
+</mapper>
+
+
+

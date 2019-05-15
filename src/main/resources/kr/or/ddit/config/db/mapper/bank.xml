@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="bank">
+
+
+	<!-- 은행정보 가져오기 -->
+	<select id="getAllBank" resultType="bankVo">
+		SELECT
+			BANKCODE, BANKNAME
+		FROM BANK
+	</select>
+	
+	<!-- 은행정보 추가하기 -->
+	<insert id="insertBank">
+		INSERT INTO BANK
+			(BANKCODE, BANKNAME)
+		VALUES
+			(#{bankCode},#{bankName})
+	</insert>
+</mapper>
+
+
+

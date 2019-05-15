@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="sales_detail">
+
+
+	<!-- 매입매출상세 입력 -->
+	<insert id="insertSales_detail" parameterType="sales_detailVo">
+		insert into sales_detail
+		(salesdetailcode, status, price, establishcode, salescode, jukyo)
+		values
+		(sales_detail_seq.nextval,#{status},#{price},#{establishCode},#{salesCode}
+		,#{jukyo})
+
+	</insert>
+	
+	
+	<!-- 전표상세 수정하기 -->
+	<update id="updateSales_detail" parameterType="sales_detailVo">
+		update sales_detail
+		set	ESTABLISHCODE = #{establishCode}
+			,JUKYO = nvl(#{jukyo,jdbcType=VARCHAR},jukyo) 
+			,PRICE = nvl(#{price,jdbcType=VARCHAR},price) 
+			,STATUS = nvl(#{status,jdbcType=VARCHAR},status)
+		WHERE SALESDETAILCODE=#{salesDetailCode}
+		
+	</update>
+
+
+	<!-- 매입매출상세  전체 불러오기 -->
+	<select id="getAllSales_detail" resultType="sales_detailVo">
+		select
+		salesdetailcode, status, price, establishcode, salescode, jukyo
+		from sales_detail
+	</select>
+
+
+	<!-- 매입매출  선택하여 가져오기 -->
+	<select id="selectSales_detail" resultType="sales_detailVo"
+		parameterType="String">
+		select
+		salesDetailCode, status, price, establishCode, salesCode, jukyo
+		from
+		sales_detail
+		where salesCode = #{salesCode}
+	</select>
+
+
+	<!-- 매입매출상세  삭제 -->
+	<delete id="deleteSales_detail" parameterType="String">
+		delete from sales_detail
+		where salesCode = #{salesCode}
+	</delete>
+
+</mapper>
+
+
+

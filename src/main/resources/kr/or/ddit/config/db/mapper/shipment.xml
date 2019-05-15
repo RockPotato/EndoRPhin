@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="shipment">
+
+	
+	
+	<!-- 출하 입력 -->
+	<insert id="insertShipment" parameterType="shipmentVo">
+		insert into shipment
+		(shipmentcode, shipmentdate, clientcode, shipmentstatus, ordercode)
+		values
+		(#{shipmentcode},sysdate,#{clientcode},#{shipmentstatus},#{ordercode})
+
+	</insert>
+
+
+	<!-- 출하  전체 불러오기 -->
+	<select id="getAllShipment" resultType="shipmentVo">
+		select
+		shipmentcode, shipmentdate, clientcode, shipmentstatus, ordercode
+		from shipment
+	</select>
+
+
+	<!-- 출하  선택하여 가져오기 -->
+	<select id="selectShipment" resultType="shipmentVo"
+		parameterType="String">
+		select
+		shipmentcode, shipmentdate, clientcode, shipmentstatus, ordercode
+		from
+		shipment
+		where shipmentcode = #{shipmentcode}
+	</select>
+
+
+	<!-- 출하  삭제 -->
+	<delete id="deleteShipment" parameterType="String">
+		delete from shipment
+		where shipmentcode = #{shipmentcode}
+	</delete>
+
+</mapper>
+
+
+

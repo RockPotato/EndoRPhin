@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="employee_detail">
+
+
+	<!-- 사원정보 입력 -->
+	<insert id="insertEmployee_detail" parameterType="employee_detailVo">
+		insert into employee_detail
+		(userid, finalschool, email, phonenumber, address, marrystatus,imagecode)
+		values
+		(
+		#{userId},
+		nvl(#{finalSchool, jdbcType=VARCHAR},null),
+		nvl(#{email, jdbcType=VARCHAR},null),
+		nvl(#{phoneNumber, jdbcType=VARCHAR},null),
+		nvl(#{address, jdbcType=VARCHAR},null),
+		nvl(#{marryStatus, jdbcType=VARCHAR},null),
+		nvl(#{imagecode, jdbcType=VARCHAR},null)
+		)
+	
+	</insert>
+
+
+	<!-- 사원정보 전체 불러오기 -->
+	<select id="getAllEmployee_detail" resultType="employee_detailVo">
+		select
+		userid, finalschool, email, phonenumber, address, marrystatus,imagecode
+		from employee_detail
+	</select>
+
+
+
+
+
+
+
+
+
+	<!-- 사원정보 선택하여 가져오기 -->
+	<select id="selectEmployee_detail" resultType="employee_detailVo"
+		parameterType="map">
+		 select
+		a.userid,
+        a.finalschool,
+        a.email,
+        a.phonenumber,
+        a.address,
+        a.marrystatus,
+        a.imagecode,
+        b.imagename,
+        b.imagerealpath,
+        b.imagerealname
+		from employee_detail a, images b
+		where a.imagecode = b.imagecode
+        and b.userid = #{userid}
+	</select>
+
+
+	<!-- 사원정보 삭제 -->
+	<delete id="deleteEmployee_detail" parameterType="map">
+		delete from employee_detail
+		where userid = #{userid}
+	</delete>
+	
+	
+	
+	
+	<!-- 사원 업데이트 -->
+			<update id="updateEmployee_detail" parameterType="employee_detailVo">
+			update employee_detail set
+			finalschool=nvl(#{finalSchool,jdbcType=VARCHAR},null),
+			email=nvl(#{email,jdbcType=VARCHAR},null),
+			phonenumber=nvl(#{phoneNumber,jdbcType=VARCHAR},null),
+			address=nvl(#{address,jdbcType=VARCHAR},null),
+			marrystatus=nvl(#{marryStatus,jdbcType=VARCHAR},null),
+			imagecode=nvl(#{imagecode,jdbcType=VARCHAR},null)
+			where userid=#{userId}
+			
+			</update>
+<select id="selectEmployee_detailCnt" parameterType="map" resultType="int">
+		select count(*)
+		from	employee_detail
+		where	userid = #{userid}
+	</select>
+
+</mapper>
+
+
+

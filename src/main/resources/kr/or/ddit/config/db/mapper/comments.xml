@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="comments">
+	
+	<!-- 게시글 별 댓글 조회  -->
+	<select id="selectComments_boardNo" resultType="commentsVo" parameterType="String">
+		select commentNo,
+			   commentTitle,
+			   commentContents,
+			   boardNo,
+			   commentDate,
+			   commentUser
+		  from comments		
+		 where boardNo = #{boardNo}
+		 order by commentDate desc
+			
+	</select>	
+	
+	<!-- 댓글 등록 -->
+	<insert id="insertComments" parameterType="commentsVo">
+		insert into comments
+		      (
+		      commentNo,
+			  commentTitle,
+			  commentContents,
+			  boardNo,
+			  commentDate,
+			  commentUser
+			  )
+		values
+		      (
+		      COMMENTNO_SEQ.nextval,
+		      nvl(#{commentTitle,
+		      jdbcType=VARCHAR }, 'null'),
+		      #{commentContents},
+		      #{boardNo},
+		      sysdate,
+		      #{commentUser}
+		      )
+
+	</insert>
+	
+	<!-- 댓글 삭제 -->
+	<delete id="deleteComments" parameterType="String">
+		delete from comments
+		where boardNo = #{boardNo}
+	</delete>
+	
+	<!-- 댓글 수정 -->
+	<update id="updateBoardReply" parameterType="commentsVo">
+		update comments
+		   set commentcontents=#{commentContents}
+			
+		 where commentno=#{commentNo}
+	</update>
+	
+	<!-- 테스트 -->
+	<!-- 댓글 등록 -->
+	<insert id="insertBoardReply" parameterType="commentsVo" >
+        
+	    insert into comments(boardNo, commentNo, commentUser, commentContents, commentDate, commentTitle)
+	    values (#{boardNo}, COMMENTNO_SEQ.nextval, #{commentUser}, #{commentContents}, sysdate, nvl(#{commentTitle, jdbcType=VARCHAR }, 'null'))
+	</insert>
+	
+	<select id="selectBoardReplyList" resultType="commentsVo" parameterType="String">
+	    select commentNo,
+			   commentTitle,
+			   commentContents,
+			   boardNo,
+			   commentDate,
+			   commentUser
+		  from comments		
+	     where boardNo=#{boardNo}
+	     order by commentDate desc
+    </select>
+	
+	<!-- 댓글 삭제 -->
+	<delete id="deleteBoardReply" parameterType="String">
+		delete from comments
+		where commentNo = #{commentNo}
+	</delete>
+
+
+</mapper>
+
+
+

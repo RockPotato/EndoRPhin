@@ -1,0 +1,139 @@
+#data,
+
+body,
+
+html {
+
+    overflow: hidden
+
+}
+
+#data{
+
+    position: absolute;
+
+    bottom: 0;
+
+    left: 0;
+
+    width: 100%;
+
+    box-sizing: border-box;
+
+    padding: 100px 15px 10px;
+
+}
+
+#data> div {
+
+    margin-bottom: 5px;
+
+    --background: linear-gradient(rgba(70, 70, 70, .6), rgba(50, 50, 50, .7));
+
+    padding: 7px 10px 1px;
+
+    animation: flipInX .5s ease, fadeOutUp 1s ease $message_hide_delays forwards;
+
+    -webkit-animation: flipInX .5s ease, fadeOutUp 1s ease $message_hide_delays forwards;
+
+    border-radius: 3px;
+
+    --box-shadow: 0 0 4px rgba(0, 0, 0, .4)
+
+}
+
+#log>div.deleted {
+
+    visibility: hidden
+
+}
+
+.meta {
+
+    display: block;
+
+    line-height: 1em
+
+}
+
+.message {
+
+    word-wrap: break-word;
+
+    line-height: 1.5em
+
+}
+
+.name {
+
+    text-transform: uppercase;
+
+    font-weight: 700
+
+}
+
+.colon {
+
+    display: none
+
+}
+
+.badge {
+
+    float: right;
+
+    padding-left: 5px;
+
+    height: .8em
+
+}
+
+#data.emote_wrap {
+
+    position: relative;
+
+}
+
+#data.emote_wrap img.emoticon {
+
+    height: $font_sizepx;
+
+    vertical-align: middle;
+
+    margin: -5px 0;
+
+}
+
+body,
+
+html {
+
+    height: 100%
+
+}
+
+body {
+
+    text-shadow: 0 0 1px rgba(0, 0, 0, .6), 0 0 2px rgba(0, 0, 0, .6)
+
+}
+
+body {
+
+    background: $background_color;
+
+    color: $text_color;
+
+}
+
+#data{
+
+    font: 600 $font_sizepx '$font_face';
+
+}
+
+span.message > img {
+
+    height: 1em;
+
+}

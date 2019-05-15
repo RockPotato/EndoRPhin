@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="de_product_div">
+<!-- 급여/공제 -->
+	
+	<!--전체 불러오기  -->
+	<select id="getAllDe_product_div" resultType="de_product_divVo">
+		select
+			deductCode,
+			deductName,
+			useStatus,
+			relate,
+			taxstatus, bonusstatus,establishcode,deprostatus
+		from de_product_div
+		order by deductcode
+	</select>
+
+	<!-- 급여/공제코드로 가져오기  -->
+	<select id="selectDe_product_div" resultType="de_product_divVo" parameterType="map">
+		select 
+			deductCode,
+			deductName,
+			useStatus,
+			relate,
+			taxstatus, bonusstatus,establishcode,deprostatus
+			from de_product_div	
+			where deductCode = #{deductCode}
+			
+	</select>
+		
+	<!-- 급여/공제 구분하여 가져오기  -->
+	<select id="getDe_product_div" resultType="de_product_divVo" parameterType="map">
+		select 
+			deductCode,
+			deductName,
+			useStatus,
+			relate,
+			taxstatus, bonusstatus,establishcode,deprostatus
+		from de_product_div	
+		where	deprostatus=#{deprostatus}
+		order by deductcode
+	</select>	
+	
+	<!-- 급여/공제 등록 -->
+	<insert id="insertDe_product_div" parameterType="de_product_divVo">
+		insert into de_product_div
+		   (deductCode,
+			deductName,
+			useStatus,
+			relate,
+			taxstatus, bonusstatus,establishcode,deprostatus)
+		values
+		(#{deductCode},#{deductName},#{useStatus},nvl(#{relate, jdbcType=VARCHAR},null),
+		nvl(#{taxStatus, jdbcType=VARCHAR},null),		
+		nvl(#{bonusStatus, jdbcType=VARCHAR},null),
+		nvl(#{establishcode, jdbcType=VARCHAR},null),
+		#{deprostatus})
+
+	</insert>
+	
+	<!-- 급여/공제 삭제 -->
+	<delete id="deleteDe_product_div" parameterType="map">
+		delete from de_product_div
+		where deductCode = #{deductCode}
+	</delete>
+	
+	<!-- 급여명으로 검색 -->
+	<select id="selectDeproductByNm" resultType="de_product_divVo"
+	parameterType="de_product_divVo">
+		select
+			deductCode,
+			deductName,
+			useStatus,
+			relate,
+			taxstatus, bonusstatus,establishcode
+		from	de_product_div
+		where	deductName like '%'||#{deductName}||'%'
+		<if test="deprostatus!=null">
+		and		deprostatus=#{deprostatus}
+		</if>
+		order by deductname
+	</select>
+	
+	<update id="updateDe_product_div" parameterType="de_product_divVo">
+		update de_product_div
+		set deductName=#{deductName}
+		, useStatus=nvl(#{useStatus, jdbcType=VARCHAR} ,useStatus)
+		, relate=nvl(#{relate, jdbcType=VARCHAR} ,relate)
+		, taxstatus=nvl(#{taxStatus, jdbcType=VARCHAR} ,taxStatus)
+		, bonusstatus=nvl(#{bonusStatus,jdbcType=VARCHAR},bonusStatus)
+		, establishcode=nvl(#{establishcode,jdbcType=VARCHAR},establishcode)
+		where   deductCode=#{deductCode}
+	</update>
+	
+	
+
+</mapper>
+
+
+

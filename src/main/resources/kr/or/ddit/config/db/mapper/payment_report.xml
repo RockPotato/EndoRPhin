@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="payment_report">
+
+	<!-- 급여이력 입력 -->
+	<insert id="insertPayment_report" parameterType="payment_reportVo">
+		<selectKey keyProperty="paymentReportCode" resultType="String" order="BEFORE">
+		  	select 
+		  		PAYMENT_REPORT_SEQ.NEXTVAL
+		  	from 
+		  		dual
+	    </selectKey>
+		insert into payment_report
+		(paymentreportcode, account, paycode,paymentdate,deadline)
+		values
+		(#{paymentReportCode},
+		nvl(#{account, jdbcType=VARCHAR},null),
+		#{payCode},
+		to_date( nvl(#{paymentdate, jdbcType=VARCHAR},null),'yyyy-MM-dd'),
+		nvl(#{deadline,jdbcType=VARCHAR},null))
+	</insert>
+
+
+	<!-- 급여이력  전체 불러오기 -->
+	<select id="getAllPayment_report" resultType="payment_reportVo">
+		select
+		paymentreportcode, account, paycode,paymentdate,deadline
+		from payment_report
+	</select>
+
+
+	<!-- 급여이력 선택하여 가져오기 -->
+	<select id="selectPayment_report" resultType="payment_reportVo"
+		parameterType="map">
+		select
+		paymentreportcode, account, paycode,paymentdate,deadline
+		from
+		payment_report where paymentreportcode = #{paymentReportCode}
+	</select>
+
+
+	<!-- 급여이력 삭제 -->
+	<delete id="deletePayment_report" parameterType="map">
+		delete from payment_report
+		where to_char(paymentdate,'yyyyMM') like #{paymentdate}
+	</delete>
+	
+	<!--  -->
+	<select id="selectPayment_reportByMonth" parameterType="map" resultType="paymentVo">
+		select nvl(sum(totalsalary),0) totalsalary
+		, nvl(sum(totalwage),0) totalwage 
+		,min(to_char(paymentdate,'yyyy-MM-dd')) payday
+		from payment p, (select
+				paymentreportcode, account, paycode,paymentdate,deadline
+				from
+				payment_report
+		<choose>
+			<when test="value!=null">
+				where	to_char(paymentdate,'yyyyMM') like #{payDay}) pr
+			</when>
+			<otherwise>
+				where	to_char(paymentdate,'yyyyMM') like to_char(sysdate,'yyyyMM')) pr
+			</otherwise>		
+		</choose>
+		where   pr.paycode = p.paycode
+	</select>
+	
+	<select id="countDeadline4prospect" resultType="String">
+		select distinct to_char(paymentdate,'yyyyMM') paymentdate
+		from payment_report
+		where   deadline is null
+	</select>
+</mapper>
+
+
+

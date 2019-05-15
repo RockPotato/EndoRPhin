@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE configuration
+  PUBLIC "-//mybatis.org//DTD Config 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-config.dtd">
+<configuration>
+    <typeAliases>
+    	<typeAlias  alias="attitude_recordVo" type="kr.or.ddit.Attitude.model.Attitude_recordVo"/>
+    	<typeAlias  alias="attitudeVo" type="kr.or.ddit.Attitude.model.AttitudeVo"/>
+    	<typeAlias  alias="account_companyVo" type="kr.or.ddit.bank.model.Account_companyVo"/>
+    	<typeAlias  alias="account_employeeVo" type="kr.or.ddit.bank.model.Account_employeeVo"/>
+    	<typeAlias  alias="bankVo" type="kr.or.ddit.bank.model.BankVo"/>
+    	<typeAlias  alias="depositVo" type="kr.or.ddit.bank.model.DepositVo"/>
+    	<typeAlias  alias="attach_boardVo" type="kr.or.ddit.board.model.Attach_boardVo"/>
+    	<typeAlias  alias="board_detailVo" type="kr.or.ddit.board.model.Board_detailVo"/>
+    	<typeAlias  alias="board_typeVo" type="kr.or.ddit.board.model.Board_TypeVo"/>
+    	<typeAlias  alias="commentsVo" type="kr.or.ddit.board.model.CommentsVo"/>
+    	<typeAlias  alias="cardsVo" type="kr.or.ddit.company.model.CardsVo"/>
+    	<typeAlias  alias="companyVo" type="kr.or.ddit.company.model.CompanyVo"/>
+    	<typeAlias  alias="deptVo" type="kr.or.ddit.company.model.DeptVo"/>
+    	<typeAlias  alias="document_refVo" type="kr.or.ddit.document.model.Document_refVo"/>
+    	<typeAlias  alias="documentVo" type="kr.or.ddit.document.model.DocumentVo"/>
+    	<typeAlias  alias="filesVo" type="kr.or.ddit.document.model.FilesVo"/>
+    	<typeAlias  alias="annualsalaryVo" type="kr.or.ddit.employee.model.AnnualsalaryVo"/>
+    	<typeAlias  alias="annualVo" type="kr.or.ddit.annual.model.AnnualVo"/>
+    	<typeAlias  alias="employee_detailVo" type="kr.or.ddit.employee.model.Employee_detailVo"/>
+    	<typeAlias  alias="employeeVo" type="kr.or.ddit.employee.model.EmployeeVo"/>
+    	<typeAlias  alias="positionVo" type="kr.or.ddit.employee.model.PositionVo"/>
+    	<typeAlias  alias="retireVo" type="kr.or.ddit.employee.model.RetireVo"/>
+    	<typeAlias  alias="imagesVo" type="kr.or.ddit.image.model.ImagesVo"/>
+    	<typeAlias  alias="clientVo" type="kr.or.ddit.order.model.ClientVo"/>
+    	<typeAlias  alias="order_detailVo" type="kr.or.ddit.order.model.Order_detailVo"/>
+    	<typeAlias  alias="ordersVo" type="kr.or.ddit.order.model.OrdersVo"/>
+    	<typeAlias  alias="shipmentVo" type="kr.or.ddit.order.model.ShipmentVo"/>
+    	<typeAlias  alias="de_product_divVo" type="kr.or.ddit.payment.model.De_product_divVo"/>
+    	<typeAlias  alias="payment_detailVo" type="kr.or.ddit.payment.model.Payment_detailVo"/>
+    	<typeAlias  alias="payment_reportVo" type="kr.or.ddit.payment.model.Payment_reportVo"/>
+    	<typeAlias  alias="paymentVo" type="kr.or.ddit.payment.model.PaymentVo"/>
+    	<typeAlias  alias="productListVo" type="kr.or.ddit.product.model.ProductListVo"/>
+    	<typeAlias  alias="productVo" type="kr.or.ddit.product.model.ProductVo"/>
+    	<typeAlias  alias="receiveVo" type="kr.or.ddit.product.model.ReceiveVo"/>
+    	<typeAlias  alias="receive_detailVo" type="kr.or.ddit.product.model.Receive_detailVo"/>
+    	<typeAlias  alias="warehouseVo" type="kr.or.ddit.product.model.WareHouseVo"/>
+    	<typeAlias  alias="assetVo" type="kr.or.ddit.slip.model.AssetVo"/>
+    	<typeAlias  alias="slip_detailVo" type="kr.or.ddit.slip.model.Slip_detailVo"/>
+    	<typeAlias  alias="slipVo" type="kr.or.ddit.slip.model.SlipVo"/>
+    	<typeAlias  alias="establishVo" type="kr.or.ddit.tax_cal.model.EstablishVo"/>
+	   	<typeAlias  alias="sales_detailVo" type="kr.or.ddit.tax_cal.model.Sales_detailVo"/>
+	   	<typeAlias  alias="surtaxVo" type="kr.or.ddit.tax_cal.model.SurtaxVo"/>
+	   	<typeAlias  alias="tax_calVo" type="kr.or.ddit.tax_cal.model.Tax_calVo"/>
+	   	<typeAlias  alias="pageVo" type="kr.or.ddit.util.model.PageVo"/>
+	   	<typeAlias  alias="ScheduleVo" type="kr.or.ddit.schedule.model.ScheduleVo"/>
+	   	<typeAlias  alias="sumchanceVo" type="kr.or.ddit.util.model.SumChanceVo"/>
+	   	<typeAlias  alias="NoteVo" type="kr.or.ddit.handler.model.NoteVo"/>
+	   	
+    </typeAliases>
+  <mappers>
+  	<mapper resource="kr/or/ddit/config/db/mapper/account_company.xml"/>
+  	<mapper resource="kr/or/ddit/config/db/mapper/account_employee.xml"/>
+  	<mapper resource="kr/or/ddit/config/db/mapper/annual.xml"/>
+  	<mapper resource="kr/or/ddit/config/db/mapper/annualsalary.xml"/>
+  	<mapper resource="kr/or/ddit/config/db/mapper/asset.xml"/>
+  	<mapper resource="kr/or/ddit/config/db/mapper/attach_board.xml"/>
+  	<mapper resource="kr/or/ddit/config/db/mapper/attitude_record.xml"/>
+  	<mapper resource="kr/or/ddit/config/db/mapper/attitude.xml"/>
+  	<mapper resource="kr/or/ddit/config/db/mapper/bank.xml"/>
+  	<mapper resource="kr/or/ddit/config/db/mapper/board_detail.xml"/>
+  	<mapper resource="kr/or/ddit/config/db/mapper/board_type.xml"/>
+  	<mapper resource="kr/or/ddit/config/db/mapper/cards.xml"/>
+  	<mapper resource="kr/or/ddit/config/db/mapper/client.xml"/>
+  	<mapper resource="kr/or/ddit/config/db/mapper/comments_ref.xml"/>
+  	<mapper resource="kr/or/ddit/config/db/mapper/comments.xml"/>
+  	<mapper resource="kr/or/ddit/config/db/mapper/company.xml"/>
+  	<mapper resource="kr/or/ddit/config/db/mapper/de_product_div.xml"/>
+  	<mapper resource="kr/or/ddit/config/db/mapper/deposit.xml"/>
+  	<mapper resource="kr/or/ddit/config/db/mapper/dept.xml"/>
+  	<mapper resource="kr/or/ddit/config/db/mapper/document.xml"/>
+  	<mapper resource="kr/or/ddit/config/db/mapper/document_ref.xml"/>
+  	<mapper resource="kr/or/ddit/config/db/mapper/employee.xml"/>
+  	<mapper resource="kr/or/ddit/config/db/mapper/employee_detail.xml"/>
+  	<mapper resource="kr/or/ddit/config/db/mapper/establish.xml"/>
+  	<mapper resource="kr/or/ddit/config/db/mapper/files.xml"/>
+  	<mapper resource="kr/or/ddit/config/db/mapper/images.xml"/>
+  	<mapper resource="kr/or/ddit/config/db/mapper/orders.xml"/>
+  	<mapper resource="kr/or/ddit/config/db/mapper/order_detail.xml"/>
+  	<mapper resource="kr/or/ddit/config/db/mapper/payment.xml"/>
+  	<mapper resource="kr/or/ddit/config/db/mapper/payment_report.xml"/>
+  	<mapper resource="kr/or/ddit/config/db/mapper/payment_detail.xml"/>
+  	<mapper resource="kr/or/ddit/config/db/mapper/position.xml"/>
+  	<mapper resource="kr/or/ddit/config/db/mapper/product.xml"/>
+  	<mapper resource="kr/or/ddit/config/db/mapper/productlist.xml"/>
+  	<mapper resource="kr/or/ddit/config/db/mapper/receive.xml"/>
+  	<mapper resource="kr/or/ddit/config/db/mapper/receive_detail.xml"/>
+  	<mapper resource="kr/or/ddit/config/db/mapper/retire.xml"/>
+  	<mapper resource="kr/or/ddit/config/db/mapper/sales_detail.xml"/>
+  	<mapper resource="kr/or/ddit/config/db/mapper/shipment.xml"/>
+  	<mapper resource="kr/or/ddit/config/db/mapper/slip.xml"/>
+  	<mapper resource="kr/or/ddit/config/db/mapper/slip_detail.xml"/>
+  	<mapper resource="kr/or/ddit/config/db/mapper/surtax.xml"/>
+  	<mapper resource="kr/or/ddit/config/db/mapper/tax_cal.xml"/>
+  	<mapper resource="kr/or/ddit/config/db/mapper/warehouse.xml"/>
+  	<mapper resource="kr/or/ddit/config/db/mapper/schedule.xml"/>
+  	<mapper resource="kr/or/ddit/config/db/mapper/note.xml"/>
+  	
+  </mappers>
+</configuration>

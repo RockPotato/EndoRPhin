@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="files">
+		
+		<!-- 파일 입력 -->
+	<insert id="insertFiles" parameterType="filesVo">
+		<selectKey keyProperty="filecode" resultType="String" order="BEFORE">
+		  	select 
+		  		files_seq.NEXTVAL
+		  	from 
+		  		dual
+	    </selectKey>
+		insert into files
+		(filecode, filename, documentnumber,realfilecode,realfilename)
+		values
+		(#{filecode},#{filename},#{documentNumber},#{realFilecode},#{realFilename})
+		
+
+	</insert>
+
+	<!-- 파일정보 수정 -->
+	<update id="updateFiles" parameterType="filesVo">
+		insert into files
+		 		 (filecode, filename, realfilecode, realfilename, documentnumber)
+										  
+		    values (
+		           files_seq.nextval,
+   		  		   #{filename, jdbcType=NULL},
+	 			   #{realfilecode, jdbcType=NULL},
+	 			   #{realfilename, jdbcType=NULL},
+	 	  		   #{documentNumber}
+	 	  		   )
+	</update>
+	
+	
+	<!-- 게시글 번호 별 첨부파일 조회  -->
+	<select id="documentFileList" resultType="filesVo" parameterType="String">
+	   select
+			filecode, filename, realfilecode, realfilename, documentnumber
+		from files
+		 where documentNumber = #{documentNumber}
+		 order by documentNumber desc
+	</select>
+	
+	
+	<!-- 파일 전체 불러오기 -->
+	<select id="getAllFiles" resultType="filesVo">
+		select
+		filecode, filename, realfilecode, realfilename, documentnumber
+		from files
+	</select>
+
+	
+
+	<!-- 파일 선택하여 가져오기 -->
+	<select id="selectFiles" resultType="filesVo"
+		parameterType="map">
+		select
+		filecode, filename, realfilecode, realfilename, documentnumber
+		from files
+		where filecode = #{filecode }
+	</select>
+
+
+	<!-- 파일 삭제 -->
+	<delete id="deleteFiles" parameterType="map">
+		delete from files
+		where documentNumber = #{documentNumber}
+	</delete>
+		
+		
+		
+</mapper>
+
+
+

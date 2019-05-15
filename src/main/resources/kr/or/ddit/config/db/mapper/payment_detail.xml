@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="payment_detail">
+
+
+		<!-- 급여/공제 상세 입력 -->
+	<insert id="insertPayment_detail" parameterType="payment_detailVo">
+		insert into payment_detail
+		(deductcode, paycode, deductpay)
+		values
+		(#{deductCode},#{payCode},
+		nvl(#{deductPay, jdbcType=VARCHAR},null))
+	</insert>
+	
+	<!-- 급여/공제 상세 수정 -->
+	<update id="updatePayment_detail" parameterType="payment_detailVo">
+		update payment_detail
+		set		deductpay=nvl(#{deductPay, jdbcType=VARCHAR},deductpay)
+		where	deductcode = #{deductCode}
+		and		paycode = #{payCode}
+	</update>
+
+	<!-- 급여/공제 상세  전체 불러오기 -->
+	<select id="getAllPayment_detail" resultType="payment_detailVo">
+		select
+		deductcode, paycode, deductpay
+		from payment_detail
+	</select>
+
+
+	<!-- 급여/공제 상세 선택하여 가져오기 -->
+	<select id="selectPayment_detail" resultType="payment_detailVo"
+		parameterType="payment_detailVo">
+		select
+		deductcode, paycode, deductpay
+		from
+		payment_detail 
+		where   deductcode = #{deductCode}
+		and		paycode = #{payCode}
+	</select>
+
+
+	<!-- 급여/공제 상세 삭제 -->
+	<delete id="deletePayment_detail" parameterType="payment_detailVo">
+		delete from payment_detail
+		<where>
+			deductcode in (select deductcode
+                       from DE_PRODUCT_DIV
+                       <if test="deprostatus!=null">
+                       where   deprostatus=#{deprostatus}
+                       </if>
+                       )
+		<if test="payCode!=null">
+			and		paycode = #{payCode}
+		</if>
+	
+		</where>
+	</delete>
+	
+
+	<!-- 급여/공제 구분하여 가져오기 -->
+	<select id="selectPayment_detailPaycode" resultType="payment_detailVo"
+		parameterType="map">
+        select
+		dpd.deductcode, pd.paycode, nvl(deductpay,0) deductpay,dpd.deprostatus
+		,to_char(p.payday,'yyyy-MM-dd') payday
+		from
+		de_product_div dpd left outer join payment_detail pd
+        on pd.deductcode=dpd.deductcode
+        and   paycode =#{paycode} left outer join payment p
+        on pd.deductcode=dpd.deductcode
+        and     p.paycode=pd.paycode
+        order by deductcode,paycode
+	</select>
+	
+	<!-- 전표입력 -->
+	<select id="selectPayment_detailSlip" parameterType="map" resultType="payment_detailVo">
+		<foreach collection="divList" item="item" index="index" open="(" close=")" separator="union all">
+			select d.deptcode, min(deptname) deptname,sum(deductpay) deductpay,min(deductcode) deductcode
+			from    dept d,employee e, (select p.paycode, userid, totalwage, totalsalary, relate, 
+					nvl(to_char(payday,'yyyy-MM-dd'),'미정') payday,taxamount,pr.paymentdate,pr.deadline
+                                    from payment_report pr , payment p
+                                    where   p.paycode = pr.paycode) p,payment_detail pd
+			where   e.deptcode = d.deptcode
+			and     e.userid = p.userid
+			and     p.paycode = pd.paycode
+			and     deductcode = #{item.deductCode}
+			and     to_char(paymentdate,'yyyyMM')=#{paydayMonth}
+			group by d.deptcode
+		</foreach>
+	</select>
+
+	<!-- 전표 입력한 내역 수정 -->	
+	<update id="updateForSlip" parameterType="map">
+		update payment_report
+		set deadline='y'
+		where PAYMENTREPORTCODE in (select PAYMENTREPORTCODE from payment_report where to_char(paymentdate,'yyyyMM')=#{paydayMonth})
+	</update>
+</mapper>
+
+
+

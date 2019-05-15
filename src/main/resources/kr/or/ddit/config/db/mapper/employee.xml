@@ -1,0 +1,324 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="employee">
+
+	<!-- 사원 입력 -->
+	<insert id="insertEmployee" parameterType="employeeVo">
+		<selectKey keyProperty="userId" resultType="String" order="BEFORE">
+		  	select 
+		  		EMPLOYEE_SEQ.NEXTVAL
+		  	from 
+		  		dual
+	    </selectKey>
+		insert into employee
+		(userid, usernm, deptcode, positioncode, rankcode, continuousyear,
+		 relate, joincompany, birthdate)
+		values
+		(
+		'P'||#{userId},
+		#{userNm},
+		nvl(#{deptCode, jdbcType=VARCHAR},null),
+		nvl(#{positionCode, jdbcType=VARCHAR},null),
+		nvl(#{rankCode, jdbcType=VARCHAR},null),
+		to_char(sysdate,'yyyy') -to_char(to_date(sysdate),'yyyy')+1,
+		nvl(#{relate, jdbcType=VARCHAR},null),
+		sysdate,
+		to_date(#{birthDate},'yyyyMMdd')
+		)
+
+	</insert>
+
+	<!-- 사원 전체 불러오기 -->
+	<!-- <select id="getAllEmployee" resultType="employeeVo">
+		select
+		userid, usernm, deptcode, positioncode, rankcode, continuousyear,
+		 relate, joincompany, birthdate, password
+		from employee
+	</select> -->
+	
+	
+	<!-- 사원 전체 불러오기 -->
+	 <select id="getAllEmployee" resultType="employeeVo">
+	 
+		select
+      a.userid,
+        a.usernm,
+        b.positionname positionname,
+        c.deptname deptname,
+        d.positionname rankname,
+        a.continuousYear, 
+        a.relate,
+        to_char(a.joincompany,'yyyy-MM-dd') joincompany,
+        to_char(a.birthdate,'yyyy-MM-dd') birthdate,
+        password
+      from employee a left outer join position b
+      on
+      a.positioncode = b.positioncode
+      left outer join dept c
+      on
+        a.deptcode = c.deptcode
+    left outer join position d
+        on
+        a.rankcode = d.positioncode
+        
+        
+	
+	</select> 
+
+
+	<!-- 사원 선택하여 가져오기 -->
+	<select id="selectEmployee" resultType="employeeVo"
+		parameterType="map">
+		  select
+      a.userid,
+        a.usernm,
+        a.deptcode,
+        a.positioncode,
+        a.rankcode,
+        b.positionname positionname,
+        c.deptname deptname,
+        d.positionname rankname,
+        a.continuousyear,
+        a.relate,
+        e.finalschool,
+        e.email,
+        e.phonenumber,
+        e.address,
+        e.imagecode,
+        f.occurannual occurannual,								
+        f.userdate userdate,									
+       (f.occurannual-f.userdate) residual,	
+       e.marrystatus,
+        to_char(a.joincompany,'yyyy-mm-dd') joincompany,
+        to_char(a.birthdate,'yyyy-mm-dd') birthdate,
+        password
+      from employee a left outer join position b
+      on
+      a.positioncode = b.positioncode
+      left outer join dept c
+      on
+        a.deptcode = c.deptcode
+   	 left outer join position d
+        on
+        a.rankcode = d.positioncode
+        left outer join employee_detail e
+        on
+        a.userid = e.userid
+         left outer join annual f
+        on
+        a.userid = f.userid
+		
+		 where a.userid = #{userid}
+	</select>
+
+
+	<!-- 사원 삭제 -->
+	<delete id="deleteEmployee" parameterType="map">
+		delete from employee
+		where userid = #{userid}
+	</delete>
+	
+	
+			<!-- 사원 업데이트 -->
+			<update id="updateEmployee" parameterType="employeeVo">
+			update employee set
+			userNm=#{userNm},
+			deptCode=nvl(#{deptCode,jdbcType=VARCHAR},deptCode),
+			positionCode=nvl(#{positionCode,jdbcType=VARCHAR},positionCode),
+			rankCode=nvl(#{rankCode,jdbcType=VARCHAR},rankCode),
+			continuousyear=nvl(#{continuousYear,jdbcType=VARCHAR},continuousYear),
+			relate=nvl(#{relate,jdbcType=VARCHAR},relate),
+			joinCompany=nvl(#{joinCompany,jdbcType=VARCHAR},joinCompany),
+			birthDate=to_date(#{BirthDate},'yyyy-MM-dd'),
+			password=nvl(#{password,jdbcType=VARCHAR},password)
+			where userId=#{userId}
+			</update>
+			
+			
+			
+			
+			<!-- 사원 선택하여 가져오기 -->
+	<select id="SearchEmployee" resultType="employeeVo"
+		parameterType="EmployeeVo">
+		select
+     	a.userid,
+        a.usernm usernm,
+        a.deptcode deptcode,
+        a.positioncode,
+        a.rankcode,
+        b.positionname positionname,
+        c.deptname deptname,
+        d.positionname rankname,
+        a.continuousyear,
+        a.relate,
+        to_char(a.joincompany,'yyyy-MM-dd') joincompany,
+        to_char(a.birthdate,'yyyy-MM-dd') birthdate,
+        password
+      from employee a left outer join position b
+      on
+      a.positioncode = b.positioncode
+      left outer join dept c
+      on
+        a.deptcode = c.deptcode
+    left outer join position d
+        on
+        a.rankcode = d.positioncode
+        <where>
+        	<if test="userNm!=null">
+    	    	 and usernm like '%'||#{userNm}||'%'
+        	</if>
+        	<if test="deptname!=null and deptname!=''">
+	        	 and deptname like '%'||#{deptname}||'%'
+        	</if>
+        	<if test="deptCode!=null">
+	        	 and a.deptcode = #{deptCode}
+        	</if>
+		</where>
+	</select>
+	
+	
+	<!-- 사원 이름으로 검색 -->
+	<!-- <select id="selectUserByNm" resultType="employeeVo" parameterType="map">
+		select  userid,usernm,deptcode,positioncode,rankcode,continuousyear,relate
+        ,joincompany,birthdate,password
+		from    employee
+		where   usernm like '%' ||#{usernm} ||'%'
+	</select> -->
+
+	<!-- 입력받은 직책보다 높은 직책 출력 -->
+	<select id="selectMoreEmployee" resultType="employeeVo" parameterType="map">
+	   select
+	       a.userId,
+	       a.userNm,
+	       a.positionCode,
+	       b.positionName positionName,
+	       c.deptName deptName,
+	       d.positionName rankName
+	      from employee
+	      a left outer join position b 
+	         on a.positionCode = b.positionCode
+	      left outer join dept c 
+	          on a.deptCode = c.deptCode
+	      left outer join position d  
+	         on a.rankCode = d.positionCode
+	</select>
+
+	<!-- 특정사원 정보 가져오기 -->
+	<select id="findInfoOne" resultType="employeeVo" parameterType="employeeVo">
+		select a.userId, a.password, b.email
+		  from employee a, employee_detail b 
+		 where a.userId = b.userId
+	       	<if test="userNm!=null and BirthDate!=null">
+			 	and a.userNm = #{userNm}
+			 	and a.BirthDate = #{BirthDate}
+			</if>
+			<if test="userId!=null and email!=null">
+				and a.userId = #{userId}
+			 	and b.email like '%'||#{email}||'%'
+			</if>
+	</select>
+
+
+	<!--인사만출력  -->
+	<select id="selectDeptCode" resultType="employeeVo" parameterType="map">
+	   select e.userId, usernm, positionname,deptname
+            from employee e, position p, dept d
+            where   e.deptcode = d.deptcode
+            and     p.positioncode = e.positioncode
+            and     e.deptcode='100'
+	</select>
+
+	<!-- 물류만 출력 -->
+	<select id="selectDeptDistribution" resultType="employeeVo" parameterType="map">
+	   select e.userId,usernm,positionname,deptname
+	            from employee e, position p, dept d
+	            where   e.deptcode = d.deptcode
+	            and     p.positioncode=e.positioncode
+	            and     e.deptcode='300'
+	</select>
+	
+	<!--부서 사원  100부서팀 검색-->   
+   <select id="searchEmpolyee" resultType="employeeVo" parameterType="map">    
+          select e.userId, usernm, positionname,deptname
+            from employee e, position p, dept d
+            where   e.deptcode = d.deptcode
+            and     p.positioncode = e.positioncode
+            and     e.deptcode='100'
+            <if test="userNm!=null and !userNm.equals('')">
+            and   e.userNm=nvl(#{userNm,jdbcType=VARCHAR},e.userNm)
+            </if>
+            <if test="deptCode!=null and !deptCode.equals('')">
+             and   d.deptName=nvl(#{deptname,jdbcType=VARCHAR},d.deptName)
+            </if>
+    </select>
+    
+    
+    <!--부서 사원 물류팀 검색  -->   	   
+   <select id="searchDistribution" resultType="employeeVo" parameterType="map">    
+          select e.userId, usernm, positionname, deptname
+            from employee e, position p, dept d
+            where   e.deptcode = d.deptcode
+            and     p.positioncode = e.positioncode
+            and     e.deptcode='300'
+             <if test="userNm!=null and !userNm.equals('')">
+            and   e.userNm=nvl(#{userNm,jdbcType=VARCHAR},e.userNm)
+            </if>
+            <if test="deptCode!=null and !deptCode.equals('')">
+             and   d.deptName=nvl(#{deptname,jdbcType=VARCHAR},d.deptName)
+            </if>
+    </select>
+
+	<!-- 사원 정보 수정하기 (비밀번호) -->
+	<update id="update_userPwd" parameterType="employeeVo">
+		update employee
+		set password = #{password}
+		where userId = #{userId}
+	</update>
+	
+	
+	
+			<select id="emplPagingList" resultType="employeeVo" parameterType="pageVo">
+				 select *
+				from
+				(
+				select a.*, rownum rn
+				from
+				(select
+				      a.userid,
+				        a.usernm,
+				        b.positionname positionname,
+				        c.deptname deptname,
+				        d.positionname rankname,
+				        a.continuousYear, 
+				        a.relate,
+				        to_char(a.joincompany,'yyyy-MM-dd') joincompany,
+				        to_char(a.birthdate,'yyyy-MM-dd') birthdate,
+				        password
+				      from employee a left outer join position b
+				      on
+				      a.positioncode = b.positioncode
+				      left outer join dept c
+				      on
+				        a.deptcode = c.deptcode
+				    left outer join position d
+				        on
+				        a.rankcode = d.positioncode) a )
+				a
+				where rn between (#{page}-1) * #{pageSize}+1 and #{page}*#{pageSize}
+				order by joincompany desc
+			</select>
+			
+			<select id="emplCnt" resultType="Integer">
+			select count(*)
+				from employee
+			</select>
+	
+	
+	
+	
+</mapper>
+
+
+

@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="position">
+
+	
+		
+		<!-- 직책/직급 입력 -->
+	<insert id="insertPosition" parameterType="positionVo">
+		insert into position
+		(positioncode, positionname, rank, usestatus, relate, positionstatus)
+		values
+		(#{positionCode},#{positionName},#{rank}
+		,nvl(#{useStatus, jdbcType=VARCHAR},null),nvl(#{relate, jdbcType=VARCHAR},null),#{positionStatus})
+
+	</insert>
+
+	<!-- 직책/직급  전체 불러오기 -->
+	<select id="getAllPosition" resultType="positionVo">
+		select
+		positioncode, positionname, rank, usestatus, relate, positionstatus
+		from position
+	</select>
+
+
+	<!-- 직책/직급선택하여 가져오기 -->
+	<select id="selectPosition" resultType="positionVo"
+		parameterType="map">
+		select
+		positioncode, positionname, rank, usestatus, relate, positionstatus
+		from
+		position where positioncode = #{positioncode}
+	</select>
+
+
+	<!-- 직책/직급 삭제 -->
+	<delete id="deletePosition" parameterType="map">
+		delete from position
+		where positioncode = #{positioncode}
+	</delete>
+	
+	
+	
+		<!-- 직책/직급 업데이트 -->
+			<update id="updatePosition" parameterType="positionVo">
+			update position set
+			positionname=nvl(#{positionName,jdbcType=VARCHAR},positionName),
+			rank=nvl(#{rank,jdbcType=VARCHAR},rank),
+			usestatus=nvl(#{useStatus,jdbcType=VARCHAR},useStatus),
+			relate=nvl(#{relate,jdbcType=VARCHAR},relate),
+			positionstatus=nvl(#{positionStatus,jdbcType=VARCHAR},positionStatus)
+			where positioncode=#{positionCode}
+			</update>
+
+
+
+
+
+</mapper>
+
+
+

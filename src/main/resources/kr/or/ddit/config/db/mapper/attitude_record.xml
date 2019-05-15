@@ -1,0 +1,149 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="attitude_record">
+	
+	<!-- 근태항목 전체 가져오기 -->
+	<select id="getAllAttitude_record" resultType="Attitude_recordVo">
+		select  a.userid,
+        a.usernm ,
+        d.deptname,
+        c.attitudecode,
+        c.attitudename,
+        to_char(b.startday,'yyyy-MM-dd') startday,
+        to_char(b.endday,'yyyy-MM-dd') endday,
+        trunc(b.endday-b.startday+1) days,
+        c.basedays ,
+        b.attitudememo
+	    from employee a, attitude_record b, attitude c, dept d
+		where a.userid = b.userid
+	    and b.attitudecode = c.attitudecode
+	    and a.deptcode = d.deptcode
+	
+	</select>
+	
+	
+	<!-- 근태항목 데이터 추가하기 -->
+	<insert id="insertAttitude_record" parameterType="Attitude_recordVo">
+		insert into attitude_record
+			(userid, startday, endday, attitudememo, status, statusname, attitudecode)
+    	values
+    		(#{userid},
+    		 #{startday}, 
+    		 #{endday},
+    		 nvl(#{attitudememo, jdbcType=VARCHAR},null),
+    		 #{status},
+    		 nvl(#{statusname, jdbcType=VARCHAR},null),
+    		 #{attitudecode})
+	</insert>
+	
+	
+		<!-- 근태항목 삭제 -->
+		<delete id="deleteAttitude_record" parameterType="Attitude_recordVo">
+			
+			delete from attitude_record
+			where userid = #{userid}
+			and startday like to_date(#{startday},'yyyy-MM-dd')
+		</delete>
+	
+	
+			<!-- 근태항목 업데이트 -->
+			<update id="updateAttitude_record" parameterType="Attitude_recordVo">
+			
+			update attitude_record set
+			startday= to_date(#{afterStartday},'yyyy-mm-dd') ,
+			endday= to_date(#{endday},'yyyy-mm-dd'),
+			attitudememo=nvl(#{attitudememo,jdbcType=VARCHAR},attitudememo),
+			status=nvl(#{status,jdbcType=VARCHAR},status),
+			statusname=nvl(#{statusname,jdbcType=VARCHAR},null),
+			attitudecode=nvl(#{attitudecode,jdbcType=VARCHAR},attitudecode)
+		
+			where userid=#{userid}
+            and startday like to_date(#{startday},'yyyy-mm-dd')
+			
+			
+			</update>
+			
+			
+			
+			
+			<!-- 근태항목 선택하여 가져오기 -->
+	<select id="SearchAttitude_record" resultType="Attitude_recordVo"
+		parameterType="Attitude_recordVo">
+		select
+            userid, startday, endday, attitudememo, status, statusname, attitudecode
+        from attitude_record
+        <where>
+        	<if test="attitudeCode!=null">
+    	    	 or userid like '%'||#{userId}||'%'
+        	</if>
+		</where>
+	</select>
+	
+	
+			<!-- 근태항목 선택하여 가져오기 -->
+	<select id="SelectAttitude_record" resultType="Attitude_recordVo"
+		parameterType="map">
+        select
+            userid,
+            to_char(startday,'yyyy-MM-dd') startday,
+            to_char(endday,'yyyy-MM-dd') endday,
+               trunc(endday-startday+1) days,
+               attitudememo,
+                status,
+                 statusname,
+                  attitudecode
+        from attitude_record
+       where userid=#{userid}
+       and startday like to_date(#{startday},'yyyy-mm-dd')
+       
+	</select>
+
+			<!-- 근태항목 검색하여 가져오기 -->
+	<select id="SearchattitudeRecord" resultType="Attitude_recordVo"
+		parameterType="map">
+		
+		select  a.userid,
+        a.usernm ,
+        d.deptname,
+        c.attitudecode,
+        c.attitudename,
+        to_char(b.startday,'yyyy-MM-dd') startday,
+        to_char(b.endday,'yyyy-MM-dd') endday,
+        trunc(b.endday-b.startday+1) days,
+        c.basedays ,
+        b.attitudememo
+       	from employee a, attitude_record b, attitude c, dept d
+      	where a.userid = b.userid
+        and b.attitudecode = c.attitudecode
+        and a.deptcode = d.deptcode
+        <if test="usernm!=null">
+        	and  a.usernm like '%' ||#{usernm}||'%'
+        </if>
+        <if test="startday!=null and endday!=null">
+	        and  startday &gt;= to_date(#{startday})
+	        and  endday &lt;= to_date(#{endday})
+        </if>
+		
+		
+		
+		
+		
+		
+	</select>
+
+
+
+
+
+
+
+
+
+
+
+</mapper>
+
+
+

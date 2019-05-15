@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="receive">
+
+	<!-- 창고 입출고 이력 입력 -->
+	<insert id="insertReceive" parameterType="receiveVo">
+		<selectKey keyProperty="receiveCode" order="BEFORE" resultType="String">
+			select receive_seq.nextval
+			from	dual
+		</selectKey>
+		insert into receive
+		(receivecode, receivedate, sortation, material,
+		 warehousecode, ordercode)
+		values
+		(#{receiveCode},sysdate,nvl(#{sortation, jdbcType=VARCHAR},null)
+		,nvl(#{material, jdbcType=VARCHAR},null)
+		,#{warehouseCode}
+		,nvl(#{orderCode, jdbcType=VARCHAR},null))
+	</insert>
+
+
+	<!-- 창고 입출고 이력  전체 불러오기 -->
+	<select id="getAllReceive" resultType="receiveVo" parameterType="map">
+		select  RECEIVECODE, to_char(RECEIVEDATE,'yyyy-MM-dd') receivedate, r.SORTATION,
+        MATERIAL, r.WAREHOUSECODE, r.ORDERCODE,warehousename
+		from    receive r left outer join orders o 
+		on   r.ordercode = o.ordercode, warehouse w
+		where		r.warehousecode = w.warehousecode
+		<if test="preDate!=null">
+	        and     receivedate (between to_date(#{preDate},'yyyy-MM-dd')
+	        and     to_date(#{postDate},'yyyy-MM-dd'))
+        </if>
+	</select>
+
+
+	<!-- 창고 입출고 이력 선택하여 가져오기 -->
+	<select id="selectReceive" resultType="receiveVo"
+		parameterType="map">
+		select  RECEIVECODE, to_char(RECEIVEDATE,'yyyy-MM-dd') receivedate, r.SORTATION, 
+        MATERIAL, r.WAREHOUSECODE, r.ORDERCODE,warehousename
+		from    receive r, orders o , warehouse w
+		where   r.ordercode = o.ordercode
+		and		r.warehousecode = w.warehousecode
+		<if test="orderCode!=null">
+			and		r.ordercode = #{orderCode}
+		</if>
+		<if test="receiveCode!=null">
+			and		r.receivecode = #{receiveCode}
+		</if>
+	</select>
+	
+
+
+	<!-- 창고 입출고 이력  삭제 -->
+	<delete id="deleteReceive" parameterType="String">
+		delete from receive
+		where receivecode = #{receiveCode}
+	</delete>
+	
+	<update id="updateReceive" parameterType="receiveVo">
+		update receive
+		set receivedate = nvl(#{receiveDate, jdbcType=VARCHAR},receivedate)
+			,sortation = nvl(#{sortation, jdbcType=VARCHAR},sortation)
+			,material = (select sum(quantity*baseprice)
+						from    receive_detail rd,product p
+						where   rd.productcode=p.productcode
+						and     receivecode=#{receiveCode})
+			,warehousecode = nvl(#{warehouseCode, jdbcType=VARCHAR},warehousecode)
+			,ordercode = nvl(#{orderCode, jdbcType=VARCHAR},ordercode)
+		where	receivecode = #{receiveCode}
+	</update>
+	
+	<select id="groupSelectReceiveWhileThisYear" resultType="receiveVo" parameterType="String">
+		select sum(quantity) quantity,to_char(receivedate,'yyyyMM') receivedate,r.sortation 
+		from receive r, receive_detail rd
+		where   r.receivecode = rd.receivecode
+		and     to_char(receivedate,'yyyyMM')=#{receivedate}
+		group by to_char(receivedate,'yyyyMM'),r.sortation
+	</select>
+</mapper>
+
+
+

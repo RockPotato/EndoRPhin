@@ -1,0 +1,18 @@
+@CHARSET "EUC-KR";
+.search_box {clear:both; position:relative; padding:20px; margin-bottom:30px;border:1px solid #dedcd7; background:#faf9f5; *zoom:1;}
+.search_box:after {content:""; display:block; clear:both; *zoom:1;}
+.search_box .search_brd {float:left; width:853px;}
+.search_box .search_brd.src_date {width:360px;}
+.search_box .search_brd.src_full {width:100%;}
+.search_box .search_brd.src_ty1 {width:250px;}
+.search_box .search_brd.src_ty2 {width:500px;}
+.search_box .search_brd.src_ty3 {width:700px;}
+.search_box .search_brd.src_ty4 {width:820px;}
+.search_box .search_btn {float:left; margin:3px 0 0 -10px;}
+.search_box .search_btn .RadButton {position:absolute; bottom:23px; height:auto !important; padding:0 !important; }
+.search_box .search_btn .RadButton input.rbDecorated {height:30px; line-height:30px; padding:0 30px; border:0; color:#FFF; background:#e6a15c;}
+.RadGrid.brd_list2 {border-bottom:1px solid #d1cfc9;}
+.RadGrid.brd_list2 .rgHeaderWrapper {background:#6e6867;}
+.RadGrid.brd_list2 table.rgMasterTable {position:relative; clear:both; width:100%; }
+.RadGrid.brd_list2 table.rgMasterTable input,
+.RadGrid.brd_list2 table.rgMasterTable span {font:normal 1em/1.2 "Nanum Gothic", Dotum, arial, Tahoma !important; color:#4c4c4c !important;}

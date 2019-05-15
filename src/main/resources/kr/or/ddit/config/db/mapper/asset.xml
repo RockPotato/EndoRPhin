@@ -1,0 +1,173 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="asset">
+
+	<!-- 자산 조회하기 -->
+	<select id="getAllAsset" resultType="assetVo">
+        SELECT
+	        ASSETCODE, 
+	        ASSETNAME, 
+	        acquisitionDate, 
+	        ACCOUNTNAME, 
+	        CLIENTNAME, 
+	        SANGGAKWAY, 
+	        ACQUISITIONPRICE, 
+	        SLIPNUMBER, 
+	        RESIDUALVALUE, 
+	        JUKYO, 
+	        COMPANYCODE,
+	        sanggakCode,
+	        depreciation,
+	        purchaseCode,
+	        accumulated,
+	        serviceLife,
+	        depreciationRate,
+	        disposalDate,
+	        disposalPrice,
+	        jangbu
+	    FROM asset
+	    order by ASSETCODE desc
+	</select>
+	
+	<!--상세화면 조회하기   -->
+	<select id="selectAsset" resultType="assetVo" parameterType="map">
+        SELECT
+	        ASSETCODE, 
+	        ASSETNAME, 
+	        acquisitionDate, 
+	        ACCOUNTNAME, 
+	        CLIENTNAME, 
+	        SANGGAKWAY, 
+	        ACQUISITIONPRICE, 
+	        SLIPNUMBER, 
+	        RESIDUALVALUE, 
+	        JUKYO, 
+	        COMPANYCODE,
+	        sanggakCode,
+	        depreciation,
+	        purchaseCode,
+	        accumulated,
+	        serviceLife,
+	        jangbu,
+	        depreciationRate
+	    FROM ASSET
+	    WHERE ASSETCODE = #{assetCode}
+	    
+	</select>
+	
+	<!--전표코드, 날짜, 상각방법등 먼저 저장시키기  -->
+	<insert id="insertStatusAsset" parameterType="assetVo">              
+     insert into asset
+        (assetCode, acquisitionDate,sanggakWay, purchaseCode,acquisitionPrice) values
+        (#{assetCode},#{acquisitionDate},#{sanggakWay},#{purchaseCode},#{acquisitionPrice}) 
+	</insert>
+	
+	<update id="updateStatusAsset" parameterType="assetVo">
+		 update asset set 
+					acquisitionDate = #{acquisitionDate},
+					sanggakWay  = #{sanggakWay},
+					acquisitionPrice = #{acquisitionPrice},
+					purchaseCode = #{purchaseCode}
+		     where  assetCode = #{assetCode}
+	</update>
+	
+	<!--일반전표 장부반영 되었을 때 전표번호등록해주기  -->
+	<update id="updateSlipNumber" parameterType="assetVo">
+		 update asset set 
+		 		slipNumber  = #{slipNumber}
+		     where  assetCode = #{assetCode}
+	</update>
+	
+	<!--매입매출에 장부완료시 장부상태 변경-->
+	<update id="updateJangbu" parameterType="assetVo">
+		 update asset set 
+		 		jangbu  = #{jangbu}
+		     where  assetCode = #{assetCode}
+	</update>
+	
+	<update id="updateAsset" parameterType="assetVo">
+		 update asset set 
+					assetName  = #{assetName},
+					acquisitionDate = #{acquisitionDate},
+					sanggakWay  = #{sanggakWay},
+					accountName = #{accountName},
+					clientName = #{clientName},
+					acquisitionPrice = #{acquisitionPrice},
+					residualvalue = #{residualvalue},
+					jukyo = #{jukyo},
+					sanggakCode = #{sanggakCode},
+					depreciation = #{depreciation},
+					accumulated = nvl(#{accumulated, jdbcType=VARCHAR},null),
+					purchaseCode = #{purchaseCode},
+					serviceLife = #{serviceLife},
+					depreciationRate = #{depreciationRate}
+		     where  assetCode = #{assetCode}
+	</update>
+	
+	<!-- 삭제 -->
+	<delete id="deleteAsset" parameterType="map">
+		delete from asset
+		where assetCode = nvl(#{assetCode, jdbcType=VARCHAR},null)
+	</delete>
+	
+	<!-- 매각 등록(수정으로 매각금액, 매각일 입력) -->
+	<insert id="updateDisposal" parameterType="assetVo">              
+    update asset set 
+  			disposalDate  = #{disposalDate},	
+		 	disposalPrice  = #{disposalPrice}
+		   where assetCode = #{assetCode}
+	</insert>	
+
+	<!--코드로 검색  -->
+	<select id="searchAsset" resultType="assetVo" parameterType="map">
+		select
+			ASSETCODE, 
+	        ASSETNAME, 
+	        acquisitionDate, 
+	        ACCOUNTNAME, 
+	        CLIENTNAME, 
+	        SANGGAKWAY, 
+	        ACQUISITIONPRICE, 
+	        SLIPNUMBER, 
+	        RESIDUALVALUE, 
+	        JUKYO, 
+	        COMPANYCODE,
+	        sanggakCode,
+	        depreciation,
+	        purchaseCode,
+	        accumulated,
+	        serviceLife,
+	        depreciationRate
+		from asset
+		where assetCode like '%' || #{assetCode} || '%'
+	</select>
+	
+	<select id="searchDateAsset" resultType="assetVo" parameterType="map">
+	   select ASSETCODE, 
+	        ASSETNAME, 
+	        acquisitionDate, 
+	        ACCOUNTNAME, 
+	        CLIENTNAME, 
+	        SANGGAKWAY, 
+	        ACQUISITIONPRICE, 
+	        SLIPNUMBER, 
+	        RESIDUALVALUE, 
+	        JUKYO, 
+	        COMPANYCODE,
+	        sanggakCode,
+	        depreciation,
+	        purchaseCode,
+	        accumulated,
+	        serviceLife,
+	        depreciationRate as all_slip
+		from asset 
+		where to_date(acquisitionDate,'yy/mm/dd') between to_date(#{acquisitionDate},'yy')
+		and to_date(sysdate,'yy/mm/dd')
+        and accountName like '%' || #{accountName} || '%'
+	 		
+	</select>
+</mapper>
+
+

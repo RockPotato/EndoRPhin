@@ -1,0 +1,283 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="board_detail">
+
+	<!-- 게시글 등록 -->
+	<insert id="postInsert" parameterType="board_detailVo">
+	<selectKey keyProperty="boardNo" resultType="String" order="AFTER">
+		  	select 
+		  		BOARDNO_SEQ.currval
+		  	from 
+		  		dual
+	    </selectKey>
+		insert into board_detail
+			  (boardNo
+			  ,title
+			  ,contents
+			  ,postDate
+			  ,boardTypeCode
+			  ,userId)
+						 
+	    values(BOARDNO_SEQ.nextval
+			  ,#{title}
+			  ,#{contents}
+			  ,sysdate
+			  ,#{boardTypeCode}
+			  ,#{userId})
+	</insert>
+	
+	<!-- 게시글 수정 -->
+	<update id="postUpdate" parameterType="board_detailVo">
+		update board_detail
+		
+		   set title=#{title},
+			   contents=#{contents},
+			   postdate=sysdate
+				
+		 where boardno = #{boardNo}
+	</update>
+ 	
+ 	<!-- 게시글 목록 조회 -->
+ 	<select id ="selectPostList" resultType="board_detailVo" parameterType="pageVo">
+	 	select boardNo, title, contents, postDate, boardTypeCode, userId, views,
+	 		   (SELECT COUNT(*) FROM ATTACH_BOARD WHERE boardNo=a.boardNo) filecnt
+		  from
+				(select a.boardNo boardNo, 
+				        a.title title, 
+				        a.contents contents, 
+				        to_char(a.postDate,'yyyy-MM-dd') postDate, 
+				        a.boardTypeCode boardTypeCode, 
+				        a.userId userId,
+				        a.views views,
+				        rownum rn
+				    from
+				    (select boardNo, 
+				    		title, 
+				    		contents, 
+				    		postDate, 
+				    		boardTypeCode, 
+				    		userId,
+				    		views
+				       from board_detail
+				       where boardTypeCode = #{boardTypeCode}
+				      order by boardNo desc) a ) a
+ 		 where rn between (#{page}-1) * #{pageSize}+1 and #{page}*#{pageSize}
+ 	</select>
+ 	
+	<!-- 게시글 상세 조회 -->
+	<select id="postDetail" resultType="board_detailVo" parameterType="String">
+		select boardno,
+			   title,
+			   contents,
+			   to_char(postdate,'yyyy-MM-dd'),
+			   boardtypecode,
+			   userid
+			   
+		  from board_detail
+		
+		 where boardNo = #{boardNo}
+		
+	</select>
+	
+	<!-- 게시판 별 게시글 수 조회 -->
+	<select id="postCnt" resultType="Integer" parameterType="String">
+		select count(boardTypeCode)
+ 		  from board_detail
+ 		 where boardTypeCode = #{boardTypeCode}
+	</select>
+	
+	
+	<!-- 게시글 삭제 -->
+	<delete id="postDelete" parameterType="String">
+ 		delete from board_detail
+ 		 where boardno = #{boardNo}
+ 	</delete>
+ 	
+ 	<!-- 	게시판 별 최신 게시글 조회 -->
+	<select id="select_boardPost" resultType="board_detailVo" parameterType="String">
+		select boardNo, title, contents, postDate, boardTypeCode, userId
+		  from board_detail
+		 where boardNo = (select max(boardNo)
+		                    from board_detail
+		                   where boardTypeCode = #{boardTypeCode})
+	</select>
+	
+	<!-- 게시글 검색 -->
+	<select id="searchPost" resultType="board_detailVo" parameterType="board_detailVo">
+		select
+            boardNo, title, contents, postDate, boardTypeCode, userId, views
+        from board_detail
+        <where>
+        	<if test="contents!=null">
+    	    	 or contents like '%'||#{boardTypeCode}||'%'
+        	</if>
+        	<if test="title!=null">
+	        	 or title like '%'||#{title}||'%'
+        	</if>
+        	<if test="userId!=null">
+	        	 or userId like '%'||#{userId}||'%'
+        	</if>
+		</where>
+	</select>
+	
+	<!-- ============== 테스트 ============ -->
+	
+	<!-- 게시글 리스트 -->
+    <select id="selectBoardList" resultType="board_detailVo" parameterType="PageVo">
+        select boardNo, title, contents, postDate, boardTypeCode, userId, views,
+        	   (SELECT COUNT(*) FROM ATTACH_BOARD WHERE boardNo=a.boardNo) filecnt
+		  from
+				(select a.boardNo boardNo, 
+				        a.title title, 
+				        a.contents contents, 
+				        to_char(a.postDate,'yyyy-MM-dd') postDate, 
+				        a.boardTypeCode boardTypeCode, 
+				        a.userId userId,
+				        a.views views,
+				        rownum rn
+				    from
+				    (select boardNo, 
+				    		title, 
+				    		contents, 
+				    		postDate, 
+				    		boardTypeCode, 
+				    		userId,
+				    		views
+				       from board_detail
+				      where boardTypeCode = #{boardTypeCode}
+				      order by boardNo desc) a ) a
+        where rn between (#{page}-1) * #{pageSize}+1 and #{page}*#{pageSize}
+    </select>
+    
+    <!-- 게시글 저장 -->
+    <insert id="insertBoard" parameterType="board_detailVo" >
+        insert into board_detail(boardNo, title, userId, contents, postDate, boardTypeCode, views)
+        values (BOARDNO_SEQ.nextval, #{title}, #{userId}, #{contents}, sysdate, #{boardTypeCode} , 0)
+	</insert>
+
+	<!-- 게시글 상세 조회 -->
+	<select id="selectBoardOne" resultType="board_detailVo" parameterType="String">
+        select boardNo, title, contents, to_char(postDate,'yyyy-MM-dd') postDate, boardTypeCode, userId, views
+          from board_detail
+         where boardNo = #{boardNo}
+    </select>
+
+	<!-- 게시글 수정 -->
+	<insert id="updateBoard" parameterType="board_detailVo" >
+        update board_detail
+		   set title=#{title}, contents=#{contents}, postdate=sysdate
+         where boardNo = #{boardNo}
+	</insert>
+	
+	<!-- 게시글 삭제 -->
+	<delete id="deleteBoardOne" parameterType="String">
+ 		delete from board_detail
+ 		 where boardNo = #{boardNo}
+ 	</delete>
+ 	
+ 	<!-- 게시판 별 게시글 수 조회 -->
+ 	<select id="selectBoardCount" resultType="Integer" parameterType="String" >
+        select count(boardTypeCode)
+          from board_detail
+         where boardTypeCode = #{boardTypeCode}
+	</select>
+	
+	<!-- 제목으로 조회 -->
+	<select id="selectBoardTitle" resultType="board_detailVo" parameterType="Map">
+        select boardNo, title, contents, to_char(postDate,'yyyy-MM-dd') postDate, boardTypeCode, userId 
+        from board_detail 
+		where postDate between #{startDate}
+		and #{endDate}
+        and title like '%' || #{title} || '%'
+    </select>
+    
+    <!-- 내용으로 조회 -->
+    <select id="selectBoardContents" resultType="board_detailVo" parameterType="Map">
+        select boardNo, title, contents, to_char(postDate,'yyyy-MM-dd') postDate, boardTypeCode, userId 
+        from board_detail 
+		where postDate between #{startDate}
+		and #{endDate}
+        and contents like '%' || #{contents} || '%'
+    </select>
+    
+    <!-- 작성자로 조회 -->
+    <select id="selectBoardUserId" resultType="board_detailVo" parameterType="Map">
+        select boardNo, title, contents, to_char(postDate,'yyyy-MM-dd') postDate, boardTypeCode, userId
+        from board_detail 
+		where postDate between #{startDate}
+		and #{endDate}
+        and userId like '%' || #{userId} || '%'
+    </select>
+    
+    <select id="listAll" resultType="board_detailVo">
+        select boardNo, title, contents, to_char(postDate,'yyyy-MM-dd') postDate, boardTypeCode, userId 
+        from board_detail 
+		<include refid="search"></include>
+    </select>
+    
+     <select id="countArticle" resultType="Integer">
+        select count(*)
+        from board_detail 
+		<include refid="search"></include>
+    </select>
+    
+    <sql id="search">
+    	where postDate between #{startDate}
+		and #{endDate}
+    	and #{searchType} like '%' || #{keyword} || '%'
+    </sql>
+    
+    <select id="postSearch" resultType="board_detailVo" parameterType="board_detailVo">
+          select boardNo, title, contents, postDate, boardTypeCode, userId, views, 
+          		 (SELECT COUNT(*) FROM ATTACH_BOARD WHERE boardNo=a.boardNo) filecnt
+		  from
+				(select a.boardNo boardNo, 
+				        a.title title, 
+				        a.contents contents, 
+				        to_char(a.postDate,'yyyy-MM-dd') postDate, 
+				        a.boardTypeCode boardTypeCode, 
+				        a.userId userId,
+				        a.views views,
+				        rownum rn
+				    from
+				    (select boardNo, 
+				    		title, 
+				    		contents, 
+				    		postDate, 
+				    		boardTypeCode, 
+				    		userId,
+				    		views
+				       from board_detail
+				      where boardTypeCode = #{boardTypeCode}   
+			     	  <if test="title != null">
+				         and title like '%' || #{title} || '%'
+				         </if>
+				         <if test="contents != null">
+				         and contents like '%' || #{contents} || '%'
+				         </if>
+				          <if test="userId != null">
+				         and userid like '%' || #{userId} || '%'
+				         </if>
+				          <if test="startDate != null and endDate != null">
+				         and postDate between #{startDate}
+						 and #{endDate}
+			   		  </if>
+				      order by boardNo desc) a ) a
+ 		 where rn between (#{page}-1) * #{pageSize}+1 and #{page}*#{pageSize}
+ 		
+   
+    </select>
+    
+    <!-- 조회수 증가 -->
+    <update id="updateViewsRead" parameterType="String">
+		update board_detail
+  		   set views = views + 1 
+		 where boardno = #{boardNo}
+ 	</update>
+ 	
+</mapper>
+
+
+

@@ -1,0 +1,27 @@
+@CHARSET "EUC-KR";
+
+
+/*  tbody 컬럼 색상  */
+.thead{
+	color : white;
+	background-color: #6E6867;
+	}
+	
+	
+/*  tbody 컬럼 색상  */
+.thead2{
+	color : white;
+	background-color: #0B3B17;
+	text-align: center;
+	}
+
+/*  modal창 그룹핑 : 자동 문단 묶음 효과  */
+.form-group{
+	width: auto;
+	}
+	
+.tr.over:hover {
+    background-color:#CCCCCC;
+}
+
+ 

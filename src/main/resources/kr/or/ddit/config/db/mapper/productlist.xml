@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="productlist">
+
+
+	
+	<!-- 상품목록 입력 -->
+	<insert id="insertProductlist" parameterType="productlistVo">
+		insert into productlist
+		(shipmentcode, productcode, quantity)
+		values
+		(#{shipmentcode},#{productcode},#{quantity})
+
+	</insert>
+
+
+	<!-- 상품목록  전체 불러오기 -->
+	<select id="getAllProductlist" resultType="productlistVo">
+		select
+		shipmentcode, productcode, quantity
+		from productlist
+	</select>
+
+
+	<!-- 상품목록 선택하여 가져오기 -->
+	<select id="selectProductlist" resultType="productlistVo"
+		parameterType="String">
+		select
+		shipmentcode, productcode, quantity
+		from
+		productlist where shipmentcode = #{shipmentcode}
+	</select>
+
+
+	<!-- 상품목록 삭제 -->
+	<delete id="deleteProductlist" parameterType="String">
+		delete from productlist
+		where shipmentcode = #{shipmentcode}
+	</delete>
+	
+	
+	
+	
+	
+	
+	
+</mapper>
+
+
+

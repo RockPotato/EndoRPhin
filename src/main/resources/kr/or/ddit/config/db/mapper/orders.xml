@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="orders">
+
+	<!-- 발주서 입력 -->
+	<insert id="insertOrders" parameterType="ordersVo">
+		<selectKey keyProperty="orderCode" resultType="String" order="BEFORE">
+		  	select 
+		  		ORDERS_SEQ.NEXTVAL
+		  	from 
+		  		dual
+	    </selectKey>
+		insert into orders
+		(ordercode, deptcode, userid, orderprice, orderlist, duedate,
+		 paymentduedate, specialnote, clientcode, status, sortation)
+		values
+		(#{orderCode}
+		,nvl(#{deptCode,jdbcType=VARCHAR},null)
+		,#{userId}
+		,nvl((select sum(baseprice*quantity)
+				from orders o , order_detail od,product p
+				where   o.ordercode=od.ordercode
+				and od.productcode=p.productcode
+				and od.ordercode = #{orderCode}),0)		
+		,#{orderList}
+		,to_date(#{dueDate},'yyyy-MM-dd')
+		,to_date(nvl(#{paymentDueDate, jdbcType=VARCHAR},null),'yyyy-MM-dd')
+		,nvl(#{specialnote, jdbcType=VARCHAR},null)
+		,#{clientCode}
+		,nvl(#{status, jdbcType=VARCHAR},0)
+		,#{sortation})
+
+	</insert>
+
+
+	<!-- 발주서 전체 불러오기 -->
+	<select id="getAllOrders" resultType="ordersVo">
+		select
+		ordercode, deptcode, userid, orderprice, orderlist, to_char(duedate,'yyyy-MM-dd') duedate,
+				 to_char(paymentduedate,'yyyy-MM-dd') paymentduedate, specialnote, clientcode, status, sortation
+		from orders
+	</select>
+
+	<!-- 발주서 선택하여 가져오기 -->
+	<select id="selectOrders" resultType="ordersVo"
+		parameterType="map">
+		select
+		o.ordercode, deptcode, userid, orderprice, orderlist, to_char(duedate,'yyyy-MM-dd') duedate,
+				 to_char(paymentduedate,'yyyy-MM-dd') paymentduedate, specialnote, o.clientcode, status, sortation,clientname
+		from
+		orders o, client c
+		where   o.clientcode=c.clientcode
+		and ordercode = #{orderCode}
+	</select>
+
+	<!-- 상품  전체 불러오기 -->
+	<select id="searchByName" resultType="ordersVo" parameterType="ordersVo">
+		select
+				o.ordercode, deptcode, userid, orderprice, orderlist, to_char(duedate,'yyyy-MM-dd') duedate,
+				 to_char(paymentduedate,'yyyy-MM-dd') paymentduedate, specialnote, 
+				 o.clientcode, status, sortation,clientname,r.receivepay
+		from	orders o left outer join (select ordercode,sum(material) receivepay from receive group by ordercode) r
+        on      r.ordercode = o.ordercode, client c
+		where   o.clientcode=c.clientcode
+		<if test="clientCode!=null and !clientCode.equals('')">
+			and o.clientcode=nvl(#{clientCode,jdbcType=VARCHAR},o.clientcode)
+		</if>
+		<if test="deptCode!=null and !deptCode.equals('')">
+			and deptcode=nvl(#{deptCode,jdbcType=VARCHAR},deptcode)
+		</if>
+		<if test="preDate!=null">
+			and duedate between to_date(#{preDate},'yyyy-MM-dd')
+       			and to_date(#{postDate},'yyyy-MM-dd')
+		</if>
+	</select>
+
+	<!-- 발주서  삭제 -->
+	<delete id="deleteOrders" parameterType="map">
+		delete from orders
+		where ordercode = #{orderCode}
+	</delete>
+	
+	<update id="updateOrders" parameterType="ordersVo">
+		update orders
+		set deptcode = nvl(#{deptCode,jdbcType=VARCHAR},deptcode)
+		,userid = nvl(#{userId,jdbcType=VARCHAR},userid)
+		,orderprice = nvl((select sum(baseprice*quantity)
+							from orders o , order_detail od,product p
+							where   o.ordercode=od.ordercode
+							and od.productcode=p.productcode
+							and od.ordercode = #{orderCode}),orderprice)		
+		,orderlist = nvl(#{orderList,jdbcType=VARCHAR},orderlist)
+		,duedate = to_date(nvl(#{dueDate,jdbcType=VARCHAR},duedate),'yyyy-MM-dd')
+		,paymentduedate = to_date(nvl(#{paymentDueDate, jdbcType=VARCHAR},paymentduedate),'yyyy-MM-dd')
+		,specialnote = nvl(#{specialnote, jdbcType=VARCHAR},specialnote)
+		,clientcode = nvl(#{clientCode, jdbcType=VARCHAR},clientcode)
+		,status = nvl(#{status, jdbcType=VARCHAR},status)
+		,sortation = nvl(#{sortation, jdbcType=VARCHAR},sortation)
+		where	ordercode = #{orderCode}
+	</update>
+</mapper>
+
+
+
